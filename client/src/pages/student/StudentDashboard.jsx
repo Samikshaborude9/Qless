@@ -1,0 +1,107 @@
+import { Link, useNavigate } from "react-router";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ShoppingCart, Clock, Ticket, LogOut } from "lucide-react";
+
+const StudentDashboard = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate("/login");
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <nav className="bg-card border-b border-border">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-lg">Q</span>
+              </div>
+              <span className="font-bold text-xl">Qless Student</span>
+            </Link>
+            <Button variant="ghost" size="sm" onClick={handleLogout}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
+          </div>
+        </div>
+      </nav>
+
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2">Welcome Back!</h1>
+          <p className="text-muted-foreground">Ready to order your meal?</p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShoppingCart className="w-5 h-5 text-primary" />
+                Quick Order
+              </CardTitle>
+              <CardDescription>Place a new order</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link to="/how-it-works">
+                <Button className="w-full">Order Now</Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Ticket className="w-5 h-5 text-accent" />
+                Active Orders
+              </CardTitle>
+              <CardDescription>Track your current orders</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">0</p>
+              <p className="text-sm text-muted-foreground">No active orders</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-muted-foreground" />
+                Order History
+              </CardTitle>
+              <CardDescription>View past orders</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link to="/student/orders">
+                <Button variant="outline" className="w-full">View History</Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-bold mb-6">Popular Items</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {["Vada Pav", "Masala Dosa", "Samosa", "Poha"].map((item, index) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="text-lg">{item}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xl font-bold text-primary">₹{[17, 40, 17, 25][index]}</span>
+                    <Button size="sm">Add</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default StudentDashboard;
