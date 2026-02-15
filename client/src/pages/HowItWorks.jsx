@@ -88,8 +88,8 @@ const HowItWorks = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <h1 className="text-5xl md:text-6xl font-bold mb-4">Explore your Menu</h1>
-            <p className="text-xl text-muted-foreground">
+            <h1 className="text-5xl md:text-6xl font-semibold tracking-tight mb-4">Explore your Menu</h1>
+            <p className="text-xl text-muted-foreground tracking-tight">
               Experience the Qless ordering flow with this interactive demo
             </p>
           </motion.div>
@@ -259,7 +259,7 @@ const HowItWorks = () => {
           )}
         </div>
       </main>
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

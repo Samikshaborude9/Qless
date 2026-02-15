@@ -14,7 +14,7 @@ const CTASection = () => {
           transition={{ duration: 0.6 }}
           className="bg-linear-to-br from-primary to-primary/80 rounded-3xl p-12 md:p-16 text-center relative overflow-hidden"
         >
-          <div className="absolute inset-0 bg-grid-white/10 [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]" />
+          <div className="absolute inset-0 bg-grid-white/10 mask-[radial-gradient(ellipse_at_center,transparent_20%,black)]" />
           
           <div className="relative z-10">
             <h2 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4">

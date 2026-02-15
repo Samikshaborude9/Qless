@@ -30,7 +30,7 @@ const AboutSection = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">About Qless</h2>
+          <h2 className="text-4xl md:text-5xl font-semibold mb-4">About Qless</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Transforming university dining with intelligent technology
           </p>

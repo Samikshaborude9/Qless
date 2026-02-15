@@ -18,11 +18,17 @@ const HeroSection = () => {
             <span className="text-sm font-medium">AI-Powered Dining Experience</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-            Queue-Free Dining,
-            <br />
-            Powered by AI
+          <h1 className="text-5xl md:text-7xl font-semibold 
+               leading-tight md:leading-tight
+               mb-6 bg-linear-to-r 
+               from-foreground to-foreground/70 
+               bg-clip-text text-transparent 
+               tracking-tight">
+              Queue-Free Dining,
+              <br />
+              Powered by AI
           </h1>
+
 
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             A smart, real-time dining solution for universities — order, track, and dine without queues.

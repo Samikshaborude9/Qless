@@ -15,39 +15,47 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import NotFound from "./pages/NotFound";
-
+import Layout from "./components/Layout";
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      {/* <Toaster /> */}
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Public Routes */}
           <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/features" element={<Features />} />
-          <Route path="/how-it-works" element={<HowItWorks />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          
-          {/* Student Protected Routes */}
-          <Route path="/student/dashboard" element={<StudentDashboard />} />
-          <Route path="/student/orders" element={<StudentOrders />} />
-          
-          {/* Admin Protected Routes */}
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/orders" element={<AdminOrders />} />
-          <Route path="/admin/analytics" element={<AdminAnalytics />} />
-          
-          {/* Catch-all 404 Route */}
-          <Route path="*" element={<NotFound />} />
+
+          {/* Wrap ALL routes inside Layout */}
+          <Route element={<Layout />}>
+
+            {/* Public Routes */}
+            
+            <Route path="/about" element={<About />} />
+            <Route path="/features" element={<Features />} />
+            <Route path="/how-it-works" element={<HowItWorks />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+
+            {/* Student Routes */}
+            <Route path="/student/dashboard" element={<StudentDashboard />} />
+            <Route path="/student/orders" element={<StudentOrders />} />
+
+            {/* Admin Routes */}
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/orders" element={<AdminOrders />} />
+            <Route path="/admin/analytics" element={<AdminAnalytics />} />
+
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
+
+          </Route>
+
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
+
 
 export default App;

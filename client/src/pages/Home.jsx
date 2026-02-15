@@ -7,16 +7,17 @@ import CTASection from "@/components/home/CTASection";
 
 const Home = () => {
   return (
-    <div className="min-h-screen px-4 sm:px-6 lg:px-8 bg-gray-50">
-      <Navbar />
-      <main>
-        <HeroSection />
-        <AboutSection />
-        <FeaturesSection />
-        <CTASection />
-      </main>
-      <Footer />
-    </div>
+    <div className="min-h-screen bg-[#f9fafb] text-slate-900">
+  <Navbar />
+  <main className="max-w-6xl mx-auto px-6">
+    <HeroSection />
+    <AboutSection />
+    <FeaturesSection />
+    <CTASection />
+  </main>
+  <Footer />
+</div>
+
   );
 };
 

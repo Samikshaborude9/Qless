@@ -2,6 +2,34 @@ import { Link, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingCart, Clock, Ticket, LogOut } from "lucide-react";
+// Food Images
+import AlooParatha from "@/assets/Aloo Paratha.jpg";
+import BhindiMasala from "@/assets/Bhindi Masala.jpg";
+import DalKhichdi from "@/assets/Dal Khichdi.jpg";
+import DalTadka from "@/assets/dal_tadka.jpg";
+import Dhokla from "@/assets/Dhokla.jpg";
+import HakkaNoodles from "@/assets/hakka noddles.jpg";
+import ManchurianRice from "@/assets/manchurian rice.jpg";
+import ManchurianNoodles from "@/assets/manchurian-noodles.png";
+import MasalaDosa from "@/assets/masala dosa.jpg";
+import MatarPaneer from "@/assets/Matar Paneer.jpg";
+import MeduVada from "@/assets/Medu Vada.jpg";
+import Misal from "@/assets/Misal.jpg";
+import MushroomMasala from "@/assets/Mushroom masala.png";
+import PaneerBiryani from "@/assets/Paneer Biryani.jpg";
+import PavBhaji from "@/assets/pav bhaji.jpg";
+import Poha from "@/assets/Poha.jpg";
+import SabudanaVada from "@/assets/Sabudana Vada.jpg";
+import SamosaChaat from "@/assets/Samosa Chaat.jpg";
+import Samosa from "@/assets/Samosa.jpg";
+import ShezwanRice from "@/assets/sehezwan rice.png";
+import Tea from "@/assets/tea.png";
+import Uttappa from "@/assets/Uttappa.jpg";
+import VadaPav from "@/assets/Vada Pav.jpeg";
+import VegBiryani from "@/assets/Veg Biryani.png";
+import VegFriedRice from "@/assets/veg fried rice.png";
+import VegPulav from "@/assets/veg pulav.jpg";
+
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
@@ -54,7 +82,7 @@ const StudentDashboard = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Ticket className="w-5 h-5 text-accent" />
+                <Ticket className="w-5 h-5 text-black" />
                 Active Orders
               </CardTitle>
               <CardDescription>Track your current orders</CardDescription>
@@ -82,23 +110,76 @@ const StudentDashboard = () => {
         </div>
 
         <div>
-          <h2 className="text-2xl font-bold mb-6">Popular Items</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {["Vada Pav", "Masala Dosa", "Samosa", "Poha"].map((item, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="text-lg">{item}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold text-primary">₹{[17, 40, 17, 25][index]}</span>
-                    <Button size="sm">Add</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+  <h2 className="text-2xl font-bold mb-6">Popular Items</h2>
+
+  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    {[
+      { name: "Aloo Paratha", price: 30, image: AlooParatha },
+      { name: "Bhindi Masala", price: 45, image: BhindiMasala },
+      { name: "Dal Khichdi", price: 35, image: DalKhichdi },
+      { name: "Dal Tadka", price: 40, image: DalTadka },
+      { name: "Dhokla", price: 25, image: Dhokla },
+      { name: "Hakka Noodles", price: 50, image: HakkaNoodles },
+      { name: "Manchurian Rice", price: 55, image: ManchurianRice },
+      { name: "Manchurian Noodles", price: 55, image: ManchurianNoodles },
+      { name: "Masala Dosa", price: 40, image: MasalaDosa },
+      { name: "Matar Paneer", price: 60, image: MatarPaneer },
+      { name: "Medu Vada", price: 35, image: MeduVada },
+      { name: "Misal", price: 30, image: Misal },
+      { name: "Mushroom Masala", price: 65, image: MushroomMasala },
+      { name: "Paneer Biryani", price: 70, image: PaneerBiryani },
+      { name: "Pav Bhaji", price: 45, image: PavBhaji },
+      { name: "Poha", price: 25, image: Poha },
+      { name: "Sabudana Vada", price: 30, image: SabudanaVada },
+      { name: "Samosa Chaat", price: 35, image: SamosaChaat },
+      { name: "Samosa", price: 17, image: Samosa },
+      { name: "Shezwan Rice", price: 50, image: ShezwanRice },
+      { name: "Tea", price: 15, image: Tea },
+      { name: "Uttappa", price: 40, image: Uttappa },
+      { name: "Vada Pav", price: 17, image: VadaPav },
+      { name: "Veg Biryani", price: 60, image: VegBiryani },
+      { name: "Veg Fried Rice", price: 50, image: VegFriedRice },
+      { name: "Veg Pulav", price: 45, image: VegPulav },
+    ].map((item, index) => (
+      <Card
+  key={index}
+  className="group rounded-2xl border-gray-600 
+             bg-card hover:shadow-xl 
+             transition-all duration-300 hover:-translate-y-1"
+>
+  <CardContent className="p-4">
+    
+    {/* Image Wrapper with Padding */}
+    <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden">
+      <img
+        src={item.image}
+        alt={item.name}
+        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+
+      {/* Soft overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-60" />
+    </div>
+
+    {/* Content */}
+    <div className="mt-4 flex justify-between items-center">
+      <h3 className="font-semibold text-base tracking-tight">
+        {item.name}
+      </h3>
+
+      <span className="text-lg font-bold text-primary">
+        ₹{item.price}
+      </span>
+    </div>
+
+  </CardContent>
+</Card>
+
+
+    ))}
+  </div>
+</div>
+
       </main>
     </div>
   );
