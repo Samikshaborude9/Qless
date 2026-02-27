@@ -70,10 +70,10 @@ export const addMenuItem = async (req, res, next) => {
     });
 
     // Auto create inventory record for this item
-    await Inventory.create({
-      menuItem: menuItem._id,
-      currentStock: stock || 0,
-    });
+    // await Inventory.create({
+    //   menuItem: menuItem._id,
+    //   currentStock: stock || 0,
+    // });
 
     res.status(201).json({
       success: true,
@@ -128,7 +128,7 @@ export const deleteMenuItem = async (req, res, next) => {
     }
 
     // Delete associated inventory record
-    await Inventory.findOneAndDelete({ menuItem: req.params.id });
+    // await Inventory.findOneAndDelete({ menuItem: req.params.id });
 
     res.status(200).json({
       success: true,
