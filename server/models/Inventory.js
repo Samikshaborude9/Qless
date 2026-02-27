@@ -3,11 +3,16 @@ import mongoose from "mongoose";
 
 const inventorySchema = new mongoose.Schema(
   {
-    menuItem: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "MenuItem",
-      required: true,
-      unique: true, // one inventory record per menu item
+    name: {
+      type: String,
+      required: [true, "Ingredient name is required"],
+      trim: true,
+      unique: true, // no duplicate ingredients
+    },
+    category: {
+      type: String,
+      enum: ["grain", "oil", "vegetable", "dairy", "spice", "beverage", "other"],
+      default: "other",
     },
     currentStock: {
       type: Number,
@@ -15,21 +20,21 @@ const inventorySchema = new mongoose.Schema(
       min: 0,
       default: 0,
     },
-    lowStockThreshold: {
-      type: Number,
-      default: 10, // alert when stock falls below this
-    },
     unit: {
       type: String,
-      enum: ["pieces", "plates", "cups", "bowls", "packets"],
-      default: "pieces",
+      enum: ["kg", "g", "litre", "ml", "pieces", "packets"],
+      required: true,
+    },
+    lowStockThreshold: {
+      type: Number,
+      default: 5,
     },
     lastRestockedAt: {
       type: Date,
     },
     lastRestockedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // admin who restocked
+      ref: "User",
     },
     notes: {
       type: String,
@@ -39,12 +44,11 @@ const inventorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Virtual — returns true if stock is low
+// Virtual — is stock low?
 inventorySchema.virtual("isLowStock").get(function () {
   return this.currentStock <= this.lowStockThreshold;
 });
 
-// Include virtuals in JSON output
 inventorySchema.set("toJSON", { virtuals: true });
 
 const Inventory = mongoose.model("Inventory", inventorySchema);
