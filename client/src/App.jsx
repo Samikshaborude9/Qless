@@ -1,61 +1,170 @@
-// import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+// src/App.jsx
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router";
+import { Toaster } from "sonner";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+
+// Pages
 import Home from "./pages/Home";
-import About from "./pages/About";
-import Features from "./pages/Features";
-import HowItWorks from "./pages/HowItWorks";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import StudentDashboard from "./pages/student/StudentDashboard";
-import StudentOrders from "./pages/student/StudentOrders";
+
+// Student Pages
+import StudentDashboard from "./pages/student/Dashboard";
+import MenuPage from "./pages/student/MenuPage";
+import OrderSummary from "./pages/student/OrderSummary";
+import MyOrders from "./pages/student/MyOrders";
+
+// Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminOrders from "./pages/admin/AdminOrders";
-import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import OrderManagement from "./pages/admin/OrderManagement";
+import MenuManagement from "./pages/admin/MenuManagement";
+import InventoryPage from "./pages/admin/InventoryPage";
+import AnalyticsPage from "./pages/admin/AnalyticsPage";
+
+// Server Pages
+import ServerDashboard from "./pages/server/ServerDashboard";
+
+// Not Found
 import NotFound from "./pages/NotFound";
-import Layout from "./components/Layout";
-const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
-          {/* Wrap ALL routes inside Layout */}
-          <Route element={<Layout />}>
+// Protected route wrapper
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const { isAuthenticated, user, loading } = useAuth();
 
-            {/* Public Routes */}
-            
-            <Route path="/about" element={<About />} />
-            <Route path="/features" element={<Features />} />
-            <Route path="/how-it-works" element={<HowItWorks />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+      </div>
+    );
+  }
 
-            {/* Student Routes */}
-            <Route path="/student/dashboard" element={<StudentDashboard />} />
-            <Route path="/student/orders" element={<StudentOrders />} />
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
-            {/* Admin Routes */}
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/orders" element={<AdminOrders />} />
-            <Route path="/admin/analytics" element={<AdminAnalytics />} />
+  if (allowedRoles && !allowedRoles.includes(user?.role)) {
+    // Redirect to correct dashboard based on role
+    if (user?.role === "student") return <Navigate to="/student/dashboard" replace />;
+    if (user?.role === "admin") return <Navigate to="/admin/dashboard" replace />;
+    if (user?.role === "server") return <Navigate to="/server/dashboard" replace />;
+  }
 
-            {/* 404 */}
-            <Route path="*" element={<NotFound />} />
+  return children;
+};
 
-          </Route>
+// Public route — redirect if already logged in
+const PublicRoute = ({ children }) => {
+  const { isAuthenticated, user, loading } = useAuth();
 
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+      </div>
+    );
+  }
 
+  if (isAuthenticated) {
+    if (user?.role === "student") return <Navigate to="/student/dashboard" replace />;
+    if (user?.role === "admin") return <Navigate to="/admin/dashboard" replace />;
+    if (user?.role === "server") return <Navigate to="/server/dashboard" replace />;
+  }
+
+  return children;
+};
+
+const AppRoutes = () => {
+  return (
+    <Routes>
+      {/* Public */}
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+
+      {/* Student Routes */}
+      <Route path="/student/dashboard" element={
+        <ProtectedRoute allowedRoles={["student"]}>
+          <StudentDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/student/menu" element={
+        <ProtectedRoute allowedRoles={["student"]}>
+          <MenuPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/student/order-summary" element={
+        <ProtectedRoute allowedRoles={["student"]}>
+          <OrderSummary />
+        </ProtectedRoute>
+      } />
+      <Route path="/student/my-orders" element={
+        <ProtectedRoute allowedRoles={["student"]}>
+          <MyOrders />
+        </ProtectedRoute>
+      } />
+
+      {/* Admin Routes */}
+      <Route path="/admin/dashboard" element={
+        <ProtectedRoute allowedRoles={["admin"]}>
+          <AdminDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/orders" element={
+        <ProtectedRoute allowedRoles={["admin"]}>
+          <OrderManagement />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/menu" element={
+        <ProtectedRoute allowedRoles={["admin"]}>
+          <MenuManagement />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/inventory" element={
+        <ProtectedRoute allowedRoles={["admin"]}>
+          <InventoryPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/analytics" element={
+        <ProtectedRoute allowedRoles={["admin"]}>
+          <AnalyticsPage />
+        </ProtectedRoute>
+      } />
+
+      {/* Server Routes */}
+      <Route path="/server/dashboard" element={
+        <ProtectedRoute allowedRoles={["server"]}>
+          <ServerDashboard />
+        </ProtectedRoute>
+      } />
+
+      {/* 404 */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <BrowserRouter>
+          <Toaster position="top-right" richColors />
+          <AppRoutes />
+        </BrowserRouter>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
