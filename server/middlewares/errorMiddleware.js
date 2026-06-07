@@ -12,6 +12,10 @@ export const errorHandler = (err, req, res, next) => {
   let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   let message = err.message;
 
+  // Log the error server-side for easier debugging in development
+  // eslint-disable-next-line no-console
+  console.error(err);
+
   // Mongoose bad ObjectId
   if (err.name === "CastError" && err.kind === "ObjectId") {
     statusCode = 404;
@@ -21,8 +25,10 @@ export const errorHandler = (err, req, res, next) => {
   // Mongoose duplicate key
   if (err.code === 11000) {
     statusCode = 400;
-    const field = Object.keys(err.keyValue)[0];
-    message = `${field} already exists`;
+    const field = Object.keys(err.keyValue || {})[0] || "resource";
+    // Map known fields to friendlier names
+    const prettyField = field === "name" || field === "menuItem" ? "Ingredient" : field;
+    message = `${prettyField} already exists`;
   }
 
   // Mongoose validation error

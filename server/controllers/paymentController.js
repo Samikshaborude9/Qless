@@ -59,7 +59,7 @@ export const createOrder = async (req, res, next) => {
 // @desc    Verify Razorpay payment signature
 // @route   POST /api/payments/verify
 // @access  Private/Student
-export const verifyPayment = async (req, res, next) => {
+export const verifyPaymen  t = async (req, res, next) => {
   try {
     const { razorpayOrderId, razorpayPaymentId, razorpaySignature, orderId } =
       req.body;

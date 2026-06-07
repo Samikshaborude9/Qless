@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import Qless from "./components/Qless";
 
 // Pages
 import Home from "./pages/Home";
@@ -89,6 +90,7 @@ const AppRoutes = () => {
     <Routes>
       {/* Public */}
       <Route path="/" element={<Home />} />
+      <Route path="/dash/dashboard" element={<Qless />} />
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
 

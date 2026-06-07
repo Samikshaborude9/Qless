@@ -7,7 +7,7 @@ const inventorySchema = new mongoose.Schema(
       type: String,
       required: [true, "Ingredient name is required"],
       trim: true,
-      unique: true, // no duplicate ingredients
+      unique: true,
     },
     category: {
       type: String,
@@ -44,7 +44,6 @@ const inventorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Virtual — is stock low?
 inventorySchema.virtual("isLowStock").get(function () {
   return this.currentStock <= this.lowStockThreshold;
 });

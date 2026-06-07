@@ -107,12 +107,44 @@ const InventoryPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Basic client-side validation to avoid sending bad requests
+    const name = (form.name || "").trim();
+    const currentStock = form.currentStock === "" ? NaN : Number(form.currentStock);
+    const lowStockThreshold =
+      form.lowStockThreshold === "" ? NaN : Number(form.lowStockThreshold);
+
+    if (!name) {
+      toast.error("Please enter ingredient name");
+      return;
+    }
+    if (Number.isNaN(currentStock)) {
+      toast.error("Please enter a valid current stock");
+      return;
+    }
+    if (Number.isNaN(lowStockThreshold)) {
+      toast.error("Please enter a valid low stock threshold");
+      return;
+    }
+
+    // Prevent adding duplicates (case-insensitive) on the client side
+    const exists = inventory.some(
+      (i) => (i?.name || "").trim().toLowerCase() === name.toLowerCase()
+    );
+    if (!editItem && exists) {
+      toast.error("Ingredient already exists");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const payload = {
-        ...form,
-        currentStock: Number(form.currentStock),
-        lowStockThreshold: Number(form.lowStockThreshold),
+        name,
+        category: form.category || "other",
+        currentStock,
+        unit: form.unit,
+        lowStockThreshold,
+        notes: form.notes || "",
       };
 
       if (editItem) {
@@ -151,6 +183,7 @@ const InventoryPage = () => {
   };
 
   const filteredInventory = inventory.filter((item) => {
+    if (!item || !item.name) return false; // ← safety check
     const matchesSearch = item.name
       .toLowerCase()
       .includes(search.toLowerCase());
@@ -160,8 +193,8 @@ const InventoryPage = () => {
     return matchesSearch && matchesLow;
   });
 
-  const lowStockCount = inventory.filter(
-    (item) => item.currentStock <= item.lowStockThreshold
+    const lowStockCount = inventory.filter(
+    (item) => item && item.currentStock <= item.lowStockThreshold
   ).length;
 
   return (
