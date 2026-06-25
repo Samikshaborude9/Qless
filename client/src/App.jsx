@@ -1,8 +1,9 @@
 // src/App.jsx
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { CartProvider } from "./context/CartContext";
 import Qless from "./components/Qless";
 
 // Pages
@@ -15,6 +16,9 @@ import StudentDashboard from "./pages/student/Dashboard";
 import MenuPage from "./pages/student/MenuPage";
 import OrderSummary from "./pages/student/OrderSummary";
 import MyOrders from "./pages/student/MyOrders";
+import StudentInsights from "./pages/student/StudentInsights";
+import StudentCartPage from "./pages/student/StudentCartPage";
+import StudentNav from "./components/student/StudentNav";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -22,6 +26,9 @@ import OrderManagement from "./pages/admin/OrderManagement";
 import MenuManagement from "./pages/admin/MenuManagement";
 import InventoryPage from "./pages/admin/InventoryPage";
 import AnalyticsPage from "./pages/admin/AnalyticsPage";
+import AdminPredictions from "./pages/admin/AdminPredictions";
+import AdminStudents from "./pages/admin/AdminStudents";
+import AdminSidebar from "./components/admin/AdminSidebar";
 
 // Server Pages
 import ServerDashboard from "./pages/server/ServerDashboard";
@@ -95,53 +102,40 @@ const AppRoutes = () => {
       <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
 
       {/* Student Routes */}
-      <Route path="/student/dashboard" element={
+      <Route path="/student" element={
         <ProtectedRoute allowedRoles={["student"]}>
-          <StudentDashboard />
+          <StudentNav />
+          <Outlet />
         </ProtectedRoute>
-      } />
-      <Route path="/student/menu" element={
-        <ProtectedRoute allowedRoles={["student"]}>
-          <MenuPage />
-        </ProtectedRoute>
-      } />
-      <Route path="/student/order-summary" element={
-        <ProtectedRoute allowedRoles={["student"]}>
-          <OrderSummary />
-        </ProtectedRoute>
-      } />
-      <Route path="/student/my-orders" element={
-        <ProtectedRoute allowedRoles={["student"]}>
-          <MyOrders />
-        </ProtectedRoute>
-      } />
+      }>
+        <Route path="dashboard" element={<StudentDashboard />} />
+        <Route path="menu" element={<MenuPage />} />
+        <Route path="order-summary" element={<OrderSummary />} />
+        <Route path="my-orders" element={<MyOrders />} />
+        <Route path="insights" element={<StudentInsights />} />
+        <Route path="cart" element={<StudentCartPage />} />
+      </Route>
 
       {/* Admin Routes */}
-      <Route path="/admin/dashboard" element={
+      <Route path="/admin" element={
         <ProtectedRoute allowedRoles={["admin"]}>
-          <AdminDashboard />
+          <div className="flex bg-gray-50 min-h-screen">
+            <AdminSidebar />
+            <main className="flex-1 overflow-y-auto h-screen">
+              <Outlet />
+            </main>
+          </div>
         </ProtectedRoute>
-      } />
-      <Route path="/admin/orders" element={
-        <ProtectedRoute allowedRoles={["admin"]}>
-          <OrderManagement />
-        </ProtectedRoute>
-      } />
-      <Route path="/admin/menu" element={
-        <ProtectedRoute allowedRoles={["admin"]}>
-          <MenuManagement />
-        </ProtectedRoute>
-      } />
-      <Route path="/admin/inventory" element={
-        <ProtectedRoute allowedRoles={["admin"]}>
-          <InventoryPage />
-        </ProtectedRoute>
-      } />
-      <Route path="/admin/analytics" element={
-        <ProtectedRoute allowedRoles={["admin"]}>
-          <AnalyticsPage />
-        </ProtectedRoute>
-      } />
+      }>
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="orders" element={<OrderManagement />} />
+        <Route path="menu" element={<MenuManagement />} />
+        <Route path="inventory" element={<InventoryPage />} />
+        <Route path="analytics" element={<AnalyticsPage />} />
+        <Route path="predictions" element={<AdminPredictions />} />
+        <Route path="students" element={<AdminStudents />} />
+      </Route>
 
       {/* Server Routes */}
       <Route path="/server/dashboard" element={
@@ -160,10 +154,12 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
-          <Toaster position="top-right" richColors />
-          <AppRoutes />
-        </BrowserRouter>
+        <CartProvider>
+          <BrowserRouter>
+            <Toaster position="top-right" richColors />
+            <AppRoutes />
+          </BrowserRouter>
+        </CartProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

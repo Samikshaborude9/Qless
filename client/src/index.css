@@ -39,6 +39,23 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Brand Theme Extensions */
+  --color-brand-green: var(--green);
+  --color-brand-green-dark: var(--green-dark);
+  --color-brand-green-mid: var(--green-mid);
+  --color-brand-green-light: var(--green-light);
+  --color-brand-green-border: var(--green-border);
+  --color-brand-bg: var(--bg);
+  --color-brand-bg-warm: var(--bg-warm);
+  --color-brand-card: var(--card);
+  --color-brand-border: var(--border);
+  --color-brand-text: var(--text);
+  --color-brand-text-muted: var(--text-muted);
+  --color-brand-text-faint: var(--text-faint);
+
+  --font-serif-display: "DM Serif Display", serif;
+  --font-sans-display: "DM Sans", sans-serif;
 }
 
 :root {
@@ -74,6 +91,21 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Brand Palette Variables */
+  --green:        #1a6b3a;
+  --green-dark:   #145530;
+  --green-mid:    #2d9d5c;
+  --green-light:  #e6f4ec;
+  --green-border: #b8dfc8;
+  --bg:           #f7f9f5;
+  --bg-warm:      #faf8f4;
+  --text:         #1a2e1a;
+  --text-muted:   #6b7280;
+  --text-faint:   #9ca3af;
+  --red:          #ef4444;
+  --amber:        #f59e0b;
+  --blue:         #3b82f6;
 }
 
 .dark {
@@ -115,6 +147,32 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-brand-bg text-brand-text font-sans-display antialiased;
   }
 }
+
+/* Custom Animation Keyframes */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+/* Animation Utility Classes */
+.animate-fade-up {
+  animation: fadeUp 0.5s ease forwards;
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+

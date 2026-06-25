@@ -34,3 +34,8 @@ export const createStaffAccountAPI = async (name, email, password) => {
   });
   return response.data;
 };
+
+export const getAllUsersAPI = async () => {
+  const response = await axiosInstance.get("/auth/users");
+  return response.data;
+};
