@@ -6,6 +6,7 @@ import {
   getMe,
   updateProfile,
   createStaffAccount,
+  getAllUsers,
 } from "../controllers/authController.js";
 import { protect, adminOnly } from "../middlewares/authMiddleware.js";
 import { loginLimiter, registerLimiter } from "../middlewares/rateLimiter.js";
@@ -17,5 +18,6 @@ router.post("/login", loginLimiter, login);
 router.get("/me", protect, getMe);
 router.put("/update-profile", protect, updateProfile);
 router.post("/create-staff", protect, adminOnly, createStaffAccount);
+router.get("/users", protect, adminOnly, getAllUsers);
 
 export default router;

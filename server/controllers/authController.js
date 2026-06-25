@@ -178,3 +178,56 @@ export const createStaffAccount = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get all users with their order stats
+// @route   GET /api/auth/users
+// @access  Private/Admin
+export const getAllUsers = async (req, res, next) => {
+  try {
+    const students = await User.aggregate([
+      { $match: { role: "student" } },
+      {
+        $lookup: {
+          from: "orders",
+          localField: "_id",
+          foreignField: "student",
+          as: "ordersList",
+        },
+      },
+      {
+        $project: {
+          id: "$_id",
+          name: 1,
+          email: 1,
+          orders: { $size: "$ordersList" },
+          spent: {
+            $reduce: {
+              input: "$ordersList",
+              initialValue: 0,
+              in: {
+                $add: ["$$value", { $ifNull: ["$$this.totalAmount", 0] }]
+              },
+            },
+          },
+          joined: "$createdAt",
+          lastOrder: { $max: "$ordersList.createdAt" },
+        },
+      },
+    ]);
+
+    const now = new Date();
+    const result = students.map((s) => ({
+      ...s,
+      active: s.lastOrder
+        ? now.getTime() - new Date(s.lastOrder).getTime() < 30 * 24 * 60 * 60 * 1000
+        : false,
+    }));
+
+    res.status(200).json({
+      success: true,
+      users: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

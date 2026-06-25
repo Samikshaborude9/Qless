@@ -103,7 +103,7 @@ export const getPeakHours = async (req, res, next) => {
 
     // Format hours for frontend chart
     const formatted = peakHours.map((h) => ({
-      hour: `${h._id}:00`,
+      hour: h._id,
       orderCount: h.orderCount,
       revenue: h.revenue,
     }));

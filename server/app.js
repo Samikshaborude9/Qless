@@ -1,15 +1,15 @@
 // app.js
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
 import menuRoutes from "./routes/menuRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
-// import paymentRoutes from "./routes/paymentRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 import inventoryRoutes from "./routes/inventoryRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 import { notFound, errorHandler } from "./middlewares/errorMiddleware.js";
-
-dotenv.config();
 
 const app = express();
 
@@ -30,9 +30,10 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/orders", orderRoutes);
-// app.use("/api/payments", paymentRoutes);
+app.use("/api/payments", paymentRoutes);
 app.use("/api/inventory", inventoryRoutes);
-// app.use("/api/analytics", analyticsRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 // app.use("/api/ml", mlRoutes);
 
 // Error handlers — MUST be after routes
