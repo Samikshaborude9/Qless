@@ -1,65 +1,59 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-import joblib
-import pandas as pd
-import os
+from flask import Flask, jsonify
+from flask_cors import CORS
+from datetime import datetime
+from model_loader import load_model, predict_demand
 
-app = FastAPI()
+app = Flask(__name__)
+CORS(app)
 
-MODEL_FOLDER = "models"
-models = {}
-
-# Request schema
-class PredictionRequest(BaseModel):
-    food_item: str
-    datetime_str: str
+model, model_loaded = load_model("model.pkl")
+print("✅ Model loaded" if model_loaded else "⚠️  Demo mode — drop model.pkl here to go live")
 
 
-# Load models at startup
-@app.on_event("startup")
-def load_models():
-    if not os.path.exists(MODEL_FOLDER):
-        raise Exception("Models folder not found")
-
-    for file in os.listdir(MODEL_FOLDER):
-        if file.endswith(".pkl"):
-            name = file.replace(".pkl", "")
-            try:
-                models[name] = joblib.load(os.path.join(MODEL_FOLDER, file))
-            except Exception as e:
-                print(f"Error loading {file}: {e}")
-
-    print(f"Loaded {len(models)} models")
+def current_slot():
+    now = datetime.now()
+    idx = max(0, min(25, (now.hour - 8) * 2 + (1 if now.minute >= 30 else 0)))
+    label = f"{now.hour:02d}:{'30' if now.minute >= 30 else '00'}"
+    return idx, label, now.weekday()
 
 
-@app.get("/")
-def home():
-    return {"status": "ML service running"}
+@app.route("/api/health")
+def health():
+    return jsonify({ "status": "ok", "model_loaded": model_loaded,
+                     "mode": "live" if model_loaded else "demo" })
 
 
-@app.post("/predict")
-def predict(request: PredictionRequest):
-    food_item = request.food_item
-    datetime_str = request.datetime_str
+@app.route("/api/predict/current")
+def predict_current():
+    idx, label, weekday = current_slot()
+    return jsonify({ "slot": label, "slot_index": idx, "weekday": weekday,
+                     "mode": "live" if model_loaded else "demo",
+                     "predictions": predict_demand(model, model_loaded, idx, weekday) })
 
-    if food_item not in models:
-        raise HTTPException(status_code=404, detail=f"No model for {food_item}")
 
-    try:
-        model = models[food_item]
+@app.route("/api/predict/next")
+def predict_next():
+    idx, _, weekday = current_slot()
+    nxt = min(idx + 1, 25)
+    h = 8 + nxt // 2
+    label = f"{h:02d}:{'30' if nxt % 2 else '00'}"
+    return jsonify({ "slot": label, "slot_index": nxt, "weekday": weekday,
+                     "mode": "live" if model_loaded else "demo",
+                     "predictions": predict_demand(model, model_loaded, nxt, weekday) })
 
-        future = pd.DataFrame({
-            "ds": pd.to_datetime([datetime_str])
-        })
 
-        forecast = model.predict(future)
-        demand = int(forecast["yhat"].iloc[0])
+@app.route("/api/predict/day")
+def predict_day():
+    _, _, weekday = current_slot()
+    slots = []
+    for i in range(26):
+        h = 8 + i // 2
+        label = f"{h:02d}:{'30' if i % 2 else '00'}"
+        slots.append({ "slot": label, "slot_index": i,
+                        "predictions": predict_demand(model, model_loaded, i, weekday) })
+    return jsonify({ "weekday": weekday, "mode": "live" if model_loaded else "demo", "slots": slots })
 
-        return {
-            "food_item": food_item,
-            "datetime": datetime_str,
-            "predicted_demand": demand
-        }
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+if __name__ == "__main__":
+    print("\n🍽️  QLess Prediction API running at http://localhost:5001\n")
+    app.run(port=5001, debug=True)
