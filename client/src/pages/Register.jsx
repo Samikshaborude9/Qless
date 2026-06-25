@@ -1,9 +1,9 @@
 // src/pages/Register.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import Icon from "../components/common/Icon";
+import { toast } from "sonner";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -18,23 +18,26 @@ const Register = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError("");
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
 
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
     if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters");
+      toast.error("Password must be at least 6 characters");
       return;
     }
 
@@ -56,142 +59,139 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="w-full max-w-md"
-      >
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-xl">Q</span>
+    <div className="min-h-screen flex bg-brand-bg-warm">
+      {/* Left panel */}
+      <div className="flex-1 max-w-[520px] bg-white px-12 py-8 flex flex-col relative justify-between">
+        <div>
+          <button onClick={() => navigate('/')} className="inline-flex items-center gap-1.5 bg-transparent border-0 text-brand-text-muted text-xs font-semibold cursor-pointer mb-8 transition-colors hover:text-brand-text">
+            <Icon name="arrow" size={16} color="var(--text-muted)" />
+            Back
+          </button>
+
+          <div className="flex-1">
+            <div className="flex justify-center mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-green to-brand-green-mid flex items-center justify-center text-white text-2xl font-bold font-serif-display">Q</div>
             </div>
-            <span className="font-bold text-2xl">Qless</span>
-          </Link>
-          <h1 className="text-3xl font-bold mb-1">Create account</h1>
-          <p className="text-muted-foreground text-sm">Join Qless today</p>
-        </div>
+            <h1 className="font-serif-display text-3xl text-brand-text text-center mb-1">Create account</h1>
+            <p className="text-xs text-brand-text-muted text-center mb-7">Join QLess today</p>
 
-        {/* Card */}
-        <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
-          <form onSubmit={handleRegister} className="space-y-5">
+            <form onSubmit={handleRegister} className="flex flex-col gap-4">
+              <div className="grid grid-cols-2 gap-3.5">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold text-brand-text-faint tracking-wider">FULL NAME</label>
+                  <input 
+                    type="text"
+                    name="name"
+                    placeholder="Divya Sharma"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="bg-[#f5f7f5] border border-brand-border rounded-lg p-2.5 px-3.5 text-xs text-brand-text focus:outline-none focus:border-brand-green focus:bg-white transition-colors"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold text-brand-text-faint tracking-wider">EMAIL ADDRESS</label>
+                  <input 
+                    type="email"
+                    name="email"
+                    placeholder="name@university.edu"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="bg-[#f5f7f5] border border-brand-border rounded-lg p-2.5 px-3.5 text-xs text-brand-text focus:outline-none focus:border-brand-green focus:bg-white transition-colors"
+                  />
+                </div>
+              </div>
 
-            {/* Name */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Full Name</label>
-              <input
-                type="text"
-                name="name"
-                placeholder="John Doe"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-
-            {/* Email */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Email</label>
-              <input
-                type="email"
-                name="email"
-                placeholder="you@university.edu"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-
-            {/* Role */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Register as</label>
-              <div className="grid grid-cols-2 gap-2">
-                {["student", "admin"].map((r) => (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-brand-text-faint tracking-wider">REGISTER AS</label>
+                <div className="flex rounded-lg overflow-hidden border border-brand-border">
                   <button
-                    key={r}
                     type="button"
-                    onClick={() => setFormData({ ...formData, role: r })}
-                    className={`py-2.5 rounded-lg text-sm font-medium border transition-colors capitalize ${
-                      formData.role === r
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-background border-border text-foreground hover:bg-muted"
+                    onClick={() => setFormData({ ...formData, role: "student" })}
+                    className={`flex-1 py-2.5 text-xs font-bold border-0 cursor-pointer transition-colors ${
+                      formData.role === "student" ? "bg-brand-green text-white" : "bg-[#fdf3ec] text-brand-text-muted hover:bg-[#f5ebe0]"
                     }`}
                   >
-                    {r}
+                    Student
                   </button>
-                ))}
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, role: "admin" })}
+                    className={`flex-1 py-2.5 text-xs font-bold border-0 cursor-pointer transition-colors ${
+                      formData.role === "admin" ? "bg-brand-green text-white" : "bg-[#fdf3ec] text-brand-text-muted hover:bg-[#f5ebe0]"
+                    }`}
+                  >
+                    Canteen Admin
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Password */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
+              <div className="grid grid-cols-2 gap-3.5">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold text-brand-text-faint tracking-wider">PASSWORD</label>
+                  <div className="relative">
+                    <input 
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="w-full bg-[#f5f7f5] border border-brand-border rounded-lg p-2.5 px-3.5 pr-10 text-xs text-brand-text focus:outline-none focus:border-brand-green focus:bg-white transition-colors"
+                    />
+                    <button 
+                      type="button" 
+                      className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-0 cursor-pointer flex"
+                      onClick={() => setShowPassword(p => !p)}
+                    >
+                      <Icon name={showPassword ? 'eyeoff' : 'eye'} size={16} color="var(--text-faint)" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold text-brand-text-faint tracking-wider">CONFIRM PASSWORD</label>
+                  <input 
+                    type="password"
+                    name="confirmPassword"
+                    placeholder="••••••••"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className="w-full bg-[#f5f7f5] border border-brand-border rounded-lg p-2.5 px-3.5 text-xs text-brand-text focus:outline-none focus:border-brand-green focus:bg-white transition-colors"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Confirm Password */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Confirm Password</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="••••••••"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
+              <button type="submit" className="bg-brand-green text-white py-3.5 rounded-full font-bold text-sm border-0 cursor-pointer flex items-center justify-center gap-2 transition-all hover:bg-brand-green-dark hover:-translate-y-0.5 mt-2 disabled:opacity-75 disabled:cursor-not-allowed" disabled={loading}>
+                {loading ? "Creating Account..." : 'Create Account'}
+                <Icon name="arrow" size={15} color="#fff" />
+              </button>
+            </form>
 
-            {/* Error */}
-            {error && (
-              <p className="text-sm text-red-500 bg-red-50 px-4 py-2 rounded-lg">
-                {error}
-              </p>
-            )}
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
-            >
-              {loading && <Loader2 size={16} className="animate-spin" />}
-              {loading ? "Creating account..." : "Create Account"}
-            </button>
-
-            {/* Login link */}
-            <p className="text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
-              <Link to="/login" className="text-primary font-medium hover:underline">
-                Sign in
-              </Link>
+            <p className="text-center text-xs text-brand-text-muted mt-5">
+              Already have an account? <Link to="/login" className="text-brand-green font-semibold">Sign in</Link>
             </p>
-          </form>
+          </div>
         </div>
-      </motion.div>
+
+        {/* Support footer */}
+        <div className="mt-8 text-center">
+          <p className="text-[10px] text-brand-text-faint tracking-wider">© {new Date().getFullYear()} QLess. All rights reserved.</p>
+          <div className="flex justify-center gap-4 mt-1.5 text-[11px] text-brand-text-faint">
+            <a href="#" className="hover:text-brand-green">Privacy Policy</a>
+            <a href="#" className="hover:text-brand-green">Terms of Service</a>
+          </div>
+        </div>
+      </div>
+
+      {/* Right panel */}
+      <div className="flex-1 bg-gradient-to-br from-[#f0f7eb] via-[#e8f5e0] to-[#f5f0e8] flex items-center justify-center p-10 overflow-hidden relative">
+        <div className="bg-white rounded-[20px] shadow-lg overflow-hidden w-60 h-80 animate-float">
+          <img src="https://images.unsplash.com/photo-1597362925123-77861d3fbac7?w=300&q=80" alt="healthy food" className="w-full h-full object-cover" />
+        </div>
+        <p className="absolute bottom-6 left-0 right-0 text-center text-[10px] text-brand-text-faint leading-relaxed">
+          Skip canteen rush with real-time updates.<br />
+          Experience smarter campus dining today.
+        </p>
+      </div>
     </div>
   );
 };
