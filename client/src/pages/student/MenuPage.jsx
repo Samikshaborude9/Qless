@@ -3,47 +3,46 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { getMenuAPI } from "../../api/menuAPI";
+import { useCart } from "../../context/CartContext";
 import { formatPrice } from "../../lib/utils";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import Icon from "../../components/common/Icon";
 import {
   Search,
-  ShoppingCart,
   Plus,
   Minus,
-  UtensilsCrossed,
-  Clock,
-  ArrowLeft,
   X,
+  ShoppingCart,
 } from "lucide-react";
 import { toast } from "sonner";
 
-const CATEGORIES = [
-  "all",
-  "breakfast",
-  "lunch",
-  "dinner",
-  "snacks",
-  "beverages",
-  "other",
-];
+const FALLBACK_IMG =
+  "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=300&q=80";
 
 const MenuPage = () => {
   const navigate = useNavigate();
+  const { cart, addToCart, updateQty, removeItem, cartCount, cartTotal } = useCart();
 
   const [menuItems, setMenuItems] = useState([]);
-  const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [showCart, setShowCart] = useState(false);
+  const [showCartDrawer, setShowCartDrawer] = useState(false);
+
+  const CATEGORIES = ["all", "breakfast", "lunch", "dinner", "snacks", "beverages"];
 
   useEffect(() => {
     const fetchMenu = async () => {
+      setLoading(true);
       try {
         const filters = { available: true };
         if (search) filters.search = search;
         if (selectedCategory !== "all") filters.category = selectedCategory;
         const data = await getMenuAPI(filters);
-        setMenuItems(data.menuItems);
+        setMenuItems(data.menuItems || []);
       } catch (error) {
         toast.error("Failed to load menu");
       } finally {
@@ -53,314 +52,346 @@ const MenuPage = () => {
     fetchMenu();
   }, [search, selectedCategory]);
 
-  const addToCart = (item) => {
-    setCart((prev) => {
-      const existing = prev.find((c) => c._id === item._id);
-      if (existing) {
-        if (existing.quantity >= item.stock) {
-          toast.error("Not enough stock available");
-          return prev;
-        }
-        return prev.map((c) =>
-          c._id === item._id ? { ...c, quantity: c.quantity + 1 } : c
-        );
-      }
-      toast.success(`${item.name} added to cart`);
-      return [...prev, { ...item, quantity: 1 }];
-    });
+  const getCartQty = (itemId) => {
+    const found = cart.find((c) => (c._id || c.id) === itemId);
+    return found?.qty || found?.quantity || 0;
   };
 
-  const removeFromCart = (itemId) => {
-    setCart((prev) => {
-      const existing = prev.find((c) => c._id === itemId);
-      if (existing?.quantity === 1) {
-        return prev.filter((c) => c._id !== itemId);
-      }
-      return prev.map((c) =>
-        c._id === itemId ? { ...c, quantity: c.quantity - 1 } : c
-      );
-    });
-  };
-
-  const getCartQuantity = (itemId) => {
-    return cart.find((c) => c._id === itemId)?.quantity || 0;
-  };
-
-  const cartTotal = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-  const handleCheckout = () => {
-    if (cart.length === 0) {
-      toast.error("Your cart is empty");
-      return;
-    }
-    navigate("/student/order-summary", { state: { cart } });
-  };
-
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-card border-b border-border px-6 py-4 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate("/student/dashboard")}
-              className="p-2 hover:bg-muted rounded-lg transition-colors"
-            >
-              <ArrowLeft size={20} />
-            </button>
-            <h1 className="font-bold text-xl">Menu</h1>
-          </div>
-
-          {/* Cart Button */}
-          <button
-            onClick={() => setShowCart(true)}
-            className="relative flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
-          >
-            <ShoppingCart size={16} />
-            Cart
-            {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {cartCount}
-              </span>
-            )}
-          </button>
+  if (loading && menuItems.length === 0) {
+    return (
+      <div className="flex bg-brand-bg min-h-[calc(100vh-58px)]">
+        <div className="flex-1 p-8">
+          <p className="text-brand-text-faint text-center pt-16">
+            Loading menu...
+          </p>
         </div>
       </div>
+    );
+  }
 
-      <div className="max-w-6xl mx-auto px-6 py-6">
-        {/* Search */}
-        <div className="relative mb-4">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-          />
-          <input
-            type="text"
-            placeholder="Search dishes..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
+  return (
+    <div className="flex bg-brand-bg min-h-[calc(100vh-58px)]">
+      {/* MAIN CONTENT */}
+      <div className="flex-1 p-8 pr-4 min-w-0">
+        <h1 className="font-serif-display text-[32px] text-brand-text mb-1">
+          Menu
+        </h1>
+        <p className="text-[13px] text-brand-text-faint mb-6">
+          Browse and order your favourite food from our curated campus kitchen.
+        </p>
 
-        {/* Categories */}
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors capitalize ${
-                selectedCategory === cat
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+        {/* Search + Categories */}
+        <div className="flex gap-3 items-center mb-5 flex-wrap">
+          <div className="relative max-w-[340px] w-full">
+            <Search
+              size={16}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-text-faint"
+            />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search for food..."
+              className="pl-9 bg-white border-brand-border rounded-xl text-[13px] h-10 font-sans-display"
+            />
+          </div>
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition-colors capitalize ${
+                  selectedCategory === cat
+                    ? "bg-brand-green text-white"
+                    : "bg-brand-green-light text-brand-green border border-brand-green-border hover:bg-brand-green-border"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Menu Grid */}
-        {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[...Array(8)].map((_, i) => (
-              <div
-                key={i}
-                className="bg-muted rounded-2xl h-56 animate-pulse"
-              />
-            ))}
-          </div>
-        ) : menuItems.length === 0 ? (
-          <div className="text-center py-20">
-            <UtensilsCrossed
-              size={48}
-              className="mx-auto text-muted-foreground mb-4"
-            />
-            <p className="text-muted-foreground">No items found</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {menuItems.map((item, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+          {menuItems.map((item, i) => {
+            const unavailable = !item.available || item.stock === 0;
+            const qty = getCartQty(item._id);
+
+            return (
               <motion.div
                 key={item._id}
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="bg-card border border-border rounded-2xl overflow-hidden"
+                transition={{ delay: i * 0.03 }}
+                className={`bg-white border border-brand-border rounded-[14px] overflow-hidden flex flex-col transition-shadow hover:shadow-lg group ${
+                  unavailable ? "opacity-50 pointer-events-none grayscale-[40%]" : ""
+                }`}
               >
                 {/* Image */}
-                {item.image ? (
+                <div className="w-full aspect-[4/3] overflow-hidden relative">
                   <img
-                    src={item.image}
+                    src={item.image || FALLBACK_IMG}
                     alt={item.name}
-                    className="w-full h-36 object-cover"
+                    className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
+                      unavailable ? "opacity-45" : ""
+                    }`}
                   />
-                ) : (
-                  <div className="w-full h-36 bg-muted flex items-center justify-center">
-                    <UtensilsCrossed
-                      size={32}
-                      className="text-muted-foreground"
-                    />
-                  </div>
-                )}
+                  {unavailable && (
+                    <span className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/80 text-white text-[11px] font-bold tracking-wide px-2.5 py-0.5 rounded-full whitespace-nowrap">
+                      Currently Unavailable
+                    </span>
+                  )}
+                  {!unavailable && item.stock <= 5 && (
+                    <Badge className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold border-0 rounded-full">
+                      🔥 High Demand
+                    </Badge>
+                  )}
+                </div>
 
-                <div className="p-3">
-                  <p className="font-semibold text-sm truncate">{item.name}</p>
-                  <p className="text-xs text-muted-foreground capitalize mt-0.5">
-                    {item.category}
+                {/* Body */}
+                <div className="p-3.5 flex-1 flex flex-col">
+                  <p
+                    className={`font-serif-display text-[15px] text-brand-text mb-1 ${
+                      unavailable ? "opacity-50" : ""
+                    }`}
+                  >
+                    {item.name}
                   </p>
-
-                  <div className="flex items-center gap-1 mt-1">
-                    <Clock size={11} className="text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">
-                      {item.prepTime}m
+                  {unavailable && (
+                    <p className="text-[11px] text-brand-text-faint italic mb-1.5">
+                      Check back later
+                    </p>
+                  )}
+                  <div className="flex items-center gap-1 mb-2">
+                    <span className="text-[11px] text-brand-text-faint capitalize">
+                      {item.category}
                     </span>
-                    <span className="text-xs text-muted-foreground ml-auto">
-                      Stock: {item.stock}
-                    </span>
+                    {item.prepTime && (
+                      <span className="text-[11px] text-brand-text-faint ml-auto">
+                        ~{item.prepTime}m
+                      </span>
+                    )}
                   </div>
-
-                  <div className="flex items-center justify-between mt-3">
-                    <span className="font-bold text-sm text-primary">
+                  <div className="flex justify-between items-center mt-auto pt-2.5">
+                    <span
+                      className={`font-bold text-[17px] text-brand-green ${
+                        unavailable ? "opacity-50" : ""
+                      }`}
+                    >
                       {formatPrice(item.price)}
                     </span>
 
-                    {/* Add/Remove buttons */}
-                    {getCartQuantity(item._id) === 0 ? (
+                    {qty === 0 ? (
                       <button
                         onClick={() => addToCart(item)}
-                        disabled={item.stock === 0}
-                        className="p-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                        disabled={unavailable}
+                        className="bg-brand-green border-0 rounded-full w-[34px] h-[34px] flex items-center justify-center cursor-pointer hover:bg-brand-green-dark transition-colors disabled:opacity-35 disabled:cursor-not-allowed flex-shrink-0"
                       >
-                        <Plus size={14} />
+                        <Plus size={14} className="text-white" />
                       </button>
                     ) : (
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => removeFromCart(item._id)}
-                          className="p-1 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+                          onClick={() => updateQty(item._id, -1)}
+                          className="p-1 bg-brand-green-light border border-brand-green-border rounded-lg hover:bg-brand-green-border transition-colors"
                         >
-                          <Minus size={12} />
+                          <Minus size={12} className="text-brand-green" />
                         </button>
-                        <span className="text-sm font-medium w-4 text-center">
-                          {getCartQuantity(item._id)}
+                        <span className="text-sm font-bold text-brand-text w-4 text-center">
+                          {qty}
                         </span>
                         <button
                           onClick={() => addToCart(item)}
-                          disabled={getCartQuantity(item._id) >= item.stock}
-                          className="p-1 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                          disabled={item.stock && qty >= item.stock}
+                          className="p-1 bg-brand-green rounded-lg hover:bg-brand-green-dark transition-colors disabled:opacity-50"
                         >
-                          <Plus size={12} />
+                          <Plus size={12} className="text-white" />
                         </button>
                       </div>
                     )}
                   </div>
                 </div>
               </motion.div>
-            ))}
-          </div>
-        )}
+            );
+          })}
+
+          {menuItems.length === 0 && !loading && (
+            <div className="col-span-full text-center py-16 text-brand-text-faint text-sm">
+              No items found
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Cart Sidebar */}
+      {/* DESKTOP CART SIDEBAR */}
+      <aside className="w-72 flex-shrink-0 bg-white border-l border-brand-border p-5 sticky top-[58px] h-[calc(100vh-58px)] overflow-y-auto hidden lg:flex flex-col">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-serif-display text-lg text-brand-text">
+            Your Cart
+          </h3>
+          <span className="bg-brand-green text-white rounded-full w-[22px] h-[22px] text-[11px] font-bold flex items-center justify-center flex-shrink-0">
+            {cartCount}
+          </span>
+        </div>
+
+        {cart.length === 0 ? (
+          <p className="text-[13px] text-brand-text-faint text-center pt-10">
+            Your cart is empty
+          </p>
+        ) : (
+          <>
+            <div className="flex-1 overflow-y-auto mb-3 flex flex-col">
+              {cart.map((item) => {
+                const itemId = item._id || item.id;
+                const qty = item.qty || item.quantity || 1;
+                return (
+                  <div
+                    key={itemId}
+                    className="flex items-center justify-between py-2 border-b border-brand-border gap-2"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-semibold text-brand-text truncate">
+                        {item.name}
+                      </p>
+                      <p className="text-[11px] text-brand-text-faint mt-0.5">
+                        {qty}× {formatPrice(item.price)}
+                      </p>
+                    </div>
+                    <p className="text-[13px] text-brand-green font-bold flex-shrink-0">
+                      {formatPrice(item.price * qty)}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex justify-between text-[15px] font-bold text-brand-text border-t-2 border-brand-border pt-3 mb-3.5">
+              <span>Total</span>
+              <span>{formatPrice(cartTotal)}</span>
+            </div>
+
+            <Button
+              onClick={() => navigate("/student/cart")}
+              className="w-full bg-brand-green hover:bg-brand-green-dark text-white rounded-xl font-bold text-[13px] py-3 h-auto font-sans-display"
+            >
+              View Cart
+            </Button>
+          </>
+        )}
+      </aside>
+
+      {/* MOBILE CART FAB */}
+      <button
+        onClick={() => setShowCartDrawer(true)}
+        className="lg:hidden fixed bottom-6 right-6 z-40 bg-brand-green text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-brand-green-dark transition-colors"
+      >
+        <ShoppingCart size={20} />
+        {cartCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+            {cartCount}
+          </span>
+        )}
+      </button>
+
+      {/* MOBILE CART DRAWER */}
       <AnimatePresence>
-        {showCart && (
+        {showCartDrawer && (
           <>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setShowCart(false)}
-              className="fixed inset-0 bg-black/50 z-50"
+              onClick={() => setShowCartDrawer(false)}
+              className="fixed inset-0 bg-black/50 z-50 lg:hidden"
             />
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25 }}
-              className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-card border-l border-border z-50 flex flex-col"
+              className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-white border-l border-brand-border z-50 flex flex-col lg:hidden"
             >
-              {/* Cart Header */}
-              <div className="flex items-center justify-between p-6 border-b border-border">
-                <h2 className="font-bold text-lg">
+              <div className="flex items-center justify-between p-6 border-b border-brand-border">
+                <h2 className="font-serif-display text-lg text-brand-text">
                   Your Cart ({cartCount})
                 </h2>
                 <button
-                  onClick={() => setShowCart(false)}
-                  className="p-2 hover:bg-muted rounded-lg"
+                  onClick={() => setShowCartDrawer(false)}
+                  className="p-2 hover:bg-brand-green-light rounded-lg"
                 >
                   <X size={20} />
                 </button>
               </div>
 
-              {/* Cart Items */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div className="flex-1 overflow-y-auto p-6 space-y-3">
                 {cart.length === 0 ? (
                   <div className="text-center py-12">
                     <ShoppingCart
                       size={40}
-                      className="mx-auto text-muted-foreground mb-3"
+                      className="mx-auto text-brand-text-faint mb-3"
                     />
-                    <p className="text-muted-foreground text-sm">
+                    <p className="text-brand-text-faint text-sm">
                       Your cart is empty
                     </p>
                   </div>
                 ) : (
-                  cart.map((item) => (
-                    <div
-                      key={item._id}
-                      className="flex items-center gap-3 bg-muted rounded-xl p-3"
-                    >
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{item.name}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {formatPrice(item.price)} each
+                  cart.map((item) => {
+                    const itemId = item._id || item.id;
+                    const qty = item.qty || item.quantity || 1;
+                    return (
+                      <div
+                        key={itemId}
+                        className="flex items-center gap-3 bg-brand-green-light/50 rounded-xl p-3"
+                      >
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{item.name}</p>
+                          <p className="text-xs text-brand-text-faint mt-0.5">
+                            {formatPrice(item.price)} each
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => updateQty(itemId, -1)}
+                            className="p-1 bg-white rounded-lg border border-brand-border"
+                          >
+                            <Minus size={12} />
+                          </button>
+                          <span className="text-sm font-medium w-6 text-center">
+                            {qty}
+                          </span>
+                          <button
+                            onClick={() => addToCart(item)}
+                            className="p-1 bg-white rounded-lg border border-brand-border"
+                          >
+                            <Plus size={12} />
+                          </button>
+                        </div>
+                        <p className="text-sm font-bold text-brand-green w-16 text-right">
+                          {formatPrice(item.price * qty)}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => removeFromCart(item._id)}
-                          className="p-1 bg-background rounded-lg border border-border"
-                        >
-                          <Minus size={12} />
-                        </button>
-                        <span className="text-sm font-medium w-6 text-center">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() => addToCart(item)}
-                          className="p-1 bg-background rounded-lg border border-border"
-                        >
-                          <Plus size={12} />
-                        </button>
-                      </div>
-                      <p className="text-sm font-bold text-primary w-16 text-right">
-                        {formatPrice(item.price * item.quantity)}
-                      </p>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
 
-              {/* Cart Footer */}
               {cart.length > 0 && (
-                <div className="p-6 border-t border-border">
+                <div className="p-6 border-t border-brand-border">
                   <div className="flex items-center justify-between mb-4">
                     <span className="font-medium">Total</span>
-                    <span className="font-bold text-lg text-primary">
+                    <span className="font-bold text-lg text-brand-green">
                       {formatPrice(cartTotal)}
                     </span>
                   </div>
-                  <button
-                    onClick={handleCheckout}
-                    className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors"
+                  <Button
+                    onClick={() => {
+                      setShowCartDrawer(false);
+                      navigate("/student/cart");
+                    }}
+                    className="w-full bg-brand-green hover:bg-brand-green-dark text-white rounded-xl font-medium py-3 h-auto"
                   >
-                    Proceed to Checkout →
-                  </button>
+                    View Cart →
+                  </Button>
                 </div>
               )}
             </motion.div>
