@@ -17,7 +17,7 @@ def load_model(path=None):
     import os, pickle
 
     models = {}
-    model_dir = "models"
+    model_dir = os.path.join(os.path.dirname(__file__), "models")
 
     if not os.path.exists(model_dir):
         return {}, False
