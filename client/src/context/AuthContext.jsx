@@ -39,12 +39,12 @@ export const AuthProvider = ({ children }) => {
       setToken(data.token);
       setUser(data.user);
       toast.success(`Welcome back, ${data.user.name}!`);
-      return { success: true, role: data.user.role };
+      return { success: true, role: data.user.role, message: data.message };
     } catch (error) {
       const message =
         error.response?.data?.message || "Login failed, please try again";
       toast.error(message);
-      return { success: false };
+      return { success: false, message };
     }
   };
 
@@ -56,12 +56,12 @@ export const AuthProvider = ({ children }) => {
       setToken(data.token);
       setUser(data.user);
       toast.success("Account created successfully!");
-      return { success: true, role: data.user.role };
+      return { success: true, role: data.user.role, message: data.message };
     } catch (error) {
       const message =
         error.response?.data?.message || "Registration failed, please try again";
       toast.error(message);
-      return { success: false };
+      return { success: false, message };
     }
   };
 

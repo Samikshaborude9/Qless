@@ -1,9 +1,9 @@
 // src/pages/Login.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import Icon from "../components/common/Icon";
+import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -16,6 +16,10 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (!email || !password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
     setLoading(true);
 
     const result = await login(email, password);
@@ -30,91 +34,110 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="w-full max-w-md"
-      >
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-xl">Q</span>
+    <div className="min-h-screen flex bg-brand-bg-warm">
+      {/* Left panel */}
+      <div className="flex-1 max-w-[520px] bg-white px-12 py-8 flex flex-col relative justify-between">
+        <div>
+          <button onClick={() => navigate('/')} className="inline-flex items-center gap-1.5 bg-transparent border-0 text-brand-text-muted text-xs font-semibold cursor-pointer mb-8 transition-colors hover:text-brand-text">
+            <Icon name="arrow" size={16} color="var(--text-muted)" />
+            Back
+          </button>
+
+          <div className="flex-1">
+            <div className="flex justify-center mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-green to-brand-green-mid flex items-center justify-center text-white text-2xl font-bold font-serif-display">Q</div>
             </div>
-            <span className="font-bold text-2xl">Qless</span>
-          </Link>
-          <h1 className="text-3xl font-bold mb-1">Welcome back</h1>
-          <p className="text-muted-foreground text-sm">Sign in to your account</p>
-        </div>
+            <h1 className="font-serif-display text-3xl text-brand-text text-center mb-1">Welcome back</h1>
+            <p className="text-xs text-brand-text-muted text-center mb-7">Sign in to your QLess account</p>
 
-        {/* Card */}
-        <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
-          <form onSubmit={handleLogin} className="space-y-5">
-
-            {/* Email */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Email</label>
-              <input
-                type="email"
-                placeholder="you@university.edu"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-
-            {/* Password */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary pr-10"
+            <form onSubmit={handleLogin} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-brand-text-faint tracking-wider">EMAIL ADDRESS</label>
+                <input 
+                  type="email" 
+                  placeholder="name@university.edu"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-[#f5f7f5] border border-brand-border rounded-lg p-2.5 px-3.5 text-xs text-brand-text focus:outline-none focus:border-brand-green focus:bg-white transition-colors"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
               </div>
-            </div>
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
-            >
-              {loading && <Loader2 size={16} className="animate-spin" />}
-              {loading ? "Signing in..." : "Sign In"}
-            </button>
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between items-center">
+                  <label className="text-[10px] font-bold text-brand-text-faint tracking-wider">PASSWORD</label>
+                  <a href="#" className="text-[11px] text-brand-green font-semibold">Forgot?</a>
+                </div>
+                <div className="relative">
+                  <input 
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-[#f5f7f5] border border-brand-border rounded-lg p-2.5 px-3.5 pr-10 text-xs text-brand-text focus:outline-none focus:border-brand-green focus:bg-white transition-colors"
+                  />
+                  <button 
+                    type="button" 
+                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-0 cursor-pointer flex"
+                    onClick={() => setShowPassword(p => !p)}
+                  >
+                    <Icon name={showPassword ? 'eyeoff' : 'eye'} size={16} color="var(--text-faint)" />
+                  </button>
+                </div>
+              </div>
 
-            {/* Register link */}
-            <p className="text-center text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link to="/register" className="text-primary font-medium hover:underline">
-                Sign up
-              </Link>
+              <label className="flex items-center gap-2 text-xs text-brand-text-muted cursor-pointer mt-1">
+                <input type="checkbox" className="accent-brand-green" /> Keep me signed in
+              </label>
+
+              <button type="submit" className="bg-brand-green text-white py-3.5 rounded-full font-bold text-sm border-0 cursor-pointer flex items-center justify-center gap-2 transition-all hover:bg-brand-green-dark hover:-translate-y-0.5 mt-2 disabled:opacity-75 disabled:cursor-not-allowed" disabled={loading}>
+                {loading ? "Signing In..." : 'Sign In'}
+              </button>
+
+              <div className="flex items-center gap-3 text-brand-text-faint text-[10px] font-bold tracking-wider my-2">
+                <div className="flex-1 h-px bg-brand-border"></div>
+                <span>OR CONTINUE WITH</span>
+                <div className="flex-1 h-px bg-brand-border"></div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <button type="button" className="flex items-center justify-center gap-2 p-2.5 rounded-lg bg-white border border-brand-border text-xs font-semibold text-brand-text cursor-pointer transition-colors hover:border-brand-green hover:text-brand-green">
+                  <img src="https://www.google.com/favicon.ico" width={16} height={16} alt="Google" />
+                  Google
+                </button>
+                <button type="button" className="flex items-center justify-center gap-2 p-2.5 rounded-lg bg-white border border-brand-border text-xs font-semibold text-brand-text cursor-pointer transition-colors hover:border-brand-green hover:text-brand-green">🏫 SSO</button>
+              </div>
+            </form>
+
+            <p className="text-center text-xs text-brand-text-muted mt-5">
+              Don't have an account? <Link to="/register" className="text-brand-green font-semibold">Sign up</Link>
             </p>
-          </form>
+          </div>
         </div>
 
-        {/* Test credentials hint */}
-        <div className="mt-4 p-4 bg-muted rounded-xl text-xs text-muted-foreground text-center">
-          <p className="font-medium mb-1">Test Credentials</p>
-          <p>Student: student@test.com / 123456</p>
-          <p>Admin: admin@test.com / 123456</p>
+        {/* Support footer */}
+        <div className="mt-8 text-center">
+          <p className="text-[10px] text-brand-text-faint tracking-wider">SUPPORT &amp; TERMS</p>
+          <div className="flex justify-center gap-4 mt-1.5 text-[11px] text-brand-text-faint">
+            <a href="#" className="hover:text-brand-green">Contact</a>
+            <a href="#" className="hover:text-brand-green">Privacy Policy</a>
+          </div>
         </div>
-      </motion.div>
+      </div>
+
+      {/* Right panel */}
+      <div className="flex-1 bg-gradient-to-br from-[#f0f7eb] via-[#e8f5e0] to-[#f5f0e8] flex items-center justify-center p-10 overflow-hidden relative">
+        <div className="bg-white rounded-[20px] shadow-lg overflow-hidden w-60 animate-float">
+          <img src="https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=300&q=80" alt="food" className="w-full h-full object-cover" />
+          <div className="p-3.5 px-4">
+            <p className="font-bold text-xs text-brand-text">Masala Dosa</p>
+            <p className="text-[11px] text-brand-text-muted mt-0.5">290 cal · ₹60</p>
+          </div>
+        </div>
+        <p className="absolute bottom-6 left-0 right-0 text-center text-[10px] text-brand-text-faint leading-relaxed">
+          Skip canteen rush with real-time updates.<br />
+          Experience smarter campus dining today.
+        </p>
+      </div>
     </div>
   );
 };

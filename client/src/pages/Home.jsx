@@ -1,249 +1,105 @@
-// src/pages/Home.jsx
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import {
-  Zap,
-  ShoppingBag,
-  BarChart2,
-  Users,
-  Clock,
-  CheckCircle,
-} from "lucide-react";
+import { Link } from 'react-router-dom'
+import LandingNav from '../components/landing/LandingNav'
 
 const FEATURES = [
-  {
-    icon: <Zap size={24} className="text-blue-600" />,
-    title: "Skip the Queue",
-    description:
-      "Pre-order your food and pick it up when it's ready. No more waiting in long lines.",
-    bg: "bg-blue-50",
-  },
-  {
-    icon: <Clock size={24} className="text-orange-600" />,
-    title: "Real-time Tracking",
-    description:
-      "Track your order status live — from preparation to ready for pickup.",
-    bg: "bg-orange-50",
-  },
-  {
-    icon: <BarChart2 size={24} className="text-purple-600" />,
-    title: "Smart Analytics",
-    description:
-      "Canteen admins get powerful insights on orders, revenue and peak hours.",
-    bg: "bg-purple-50",
-  },
-  {
-    icon: <Users size={24} className="text-green-600" />,
-    title: "Live Occupancy",
-    description:
-      "See how crowded the canteen is before you go. Plan your visit smartly.",
-    bg: "bg-green-50",
-  },
-];
+  { icon: '📍', title: 'Real-time Tracking', desc: 'Know exactly where your order is. Track your meal by the minute, from kitchen to your hands.', img: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&q=80' },
+  { icon: '🔮', title: 'Demand Prediction', desc: 'Our smart system predicts peak hours to help you plan your order helping you avoid the campus rush.', img: null },
+  { icon: '💳', title: 'Spending Insights', desc: 'Know exactly how your food habits, with monthly and weekly spending summaries and personalised tips.', img: null },
+  { icon: '🥗', title: 'Nutrition Tracking', desc: 'Confident nutrition tracking to you can make decisions about your meals that meet your fitness goals.', img: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80' },
+]
 
-const Home = () => {
+const HOW = [
+  { icon: '🍽️', step: 'Browse', desc: 'Explore our curated campus menu, filter by diet, and find exactly what you crave.' },
+  { icon: '📲', step: 'Order',  desc: 'Pay instantly with your student digital wallet. A click is all your time.' },
+  { icon: '🎯', step: 'Pick up', desc: 'Head to the designated "QLess Zone", skip your order is ready, to pick up.' },
+]
+
+export default function Home() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">
-                Q
-              </span>
-            </div>
-            <span className="font-bold text-xl">Qless</span>
-          </div>
+    <div className="bg-brand-bg min-h-screen">
+      <LandingNav />
 
-          <div className="flex items-center gap-3">
-            <Link
-              to="/login"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Login
-            </Link>
-            <Link
-              to="/register"
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors"
-            >
-              Get Started
-            </Link>
+      {/* ── Hero ── */}
+      <section className="max-w-[1100px] mx-auto px-8 py-20 flex flex-col md:flex-row items-center gap-[60px]">
+        <div className="flex-1 animate-fade-up">
+          <span className="inline-block bg-brand-green-light text-brand-green border border-brand-green-border rounded-full px-3.5 py-1 text-xs font-bold mb-5 tracking-wider">🌿 AI Powered</span>
+          <h1 className="font-serif-display text-4xl sm:text-5xl lg:text-[58px] leading-[1.1] text-brand-text mb-5">
+            Skip the Queue,<br />
+            <em className="text-brand-green not-italic">Enjoy the Food</em>
+          </h1>
+          <p className="text-sm sm:text-base text-brand-text-muted leading-[1.7] max-w-[440px] mb-8">
+            QLess transforms your campus food experience with smart demand-forecasting and seamless mobile ordering. Save time, spend it savouring your body and soul.
+          </p>
+          <div className="flex gap-3.5 items-center">
+            <Link to="/register" className="bg-brand-green text-white px-7 py-3 rounded-full font-bold text-sm transition-all hover:bg-brand-green-dark hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(26,107,58,0.3)]">Get Started</Link>
+            <a href="#how" className="bg-white text-brand-text px-7 py-3 rounded-full font-semibold text-sm border border-brand-border transition-colors hover:border-brand-green hover:text-brand-green">Learn More</a>
           </div>
         </div>
-      </nav>
+        <div className="flex-1 relative h-[380px] w-full max-w-[500px] md:max-w-none">
+          <div className="absolute right-0 top-0 w-[260px] h-[260px] rounded-[20px] overflow-hidden shadow-lg animate-float">
+            <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&q=80" alt="food" className="w-full h-full object-cover" />
+          </div>
+          <div className="absolute left-5 bottom-0 w-[220px] h-[180px] rounded-2xl overflow-hidden shadow-md">
+            <img src="https://images.unsplash.com/photo-1567521464027-f127ff144326?w=500&q=80" alt="campus" className="w-full h-full object-cover" />
+          </div>
+        </div>
+      </section>
 
-      {/* Hero */}
-      <section className="pt-32 pb-20 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium mb-6">
-              <Zap size={14} />
-              AI-Powered Canteen System
-            </span>
-
-            <h1 className="text-5xl sm:text-6xl font-bold leading-tight mb-6">
-              Skip the Queue,{" "}
-              <span className="text-primary">Enjoy the Food</span>
-            </h1>
-
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10">
-              Qless is a smart canteen pre-order system that eliminates queues,
-              tracks orders in real-time, and helps canteen admins manage
-              everything effortlessly.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link
-                to="/register"
-                className="px-8 py-3.5 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors"
-              >
-                Get Started Free →
-              </Link>
-              <Link
-                to="/login"
-                className="px-8 py-3.5 border border-border rounded-xl font-medium hover:bg-muted transition-colors"
-              >
-                Sign In
-              </Link>
-            </div>
-          </motion.div>
-
-          {/* Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="grid grid-cols-3 gap-6 mt-16 max-w-lg mx-auto"
-          >
-            {[
-              { value: "0 min", label: "Queue Time" },
-              { value: "3 Roles", label: "Student, Admin, Staff" },
-              { value: "Live", label: "Real-time Updates" },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <p className="text-2xl font-bold text-primary">{stat.value}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stat.label}
-                </p>
+      {/* ── Features ── */}
+      <section id="features" className="py-20">
+        <div className="max-w-[1100px] mx-auto px-8">
+          <p className="text-2xl font-bold text-brand-text font-serif-display mb-1.5">Smart Campus Integration</p>
+          <p className="text-sm text-brand-text-muted mb-10">Leveraging data in more ways than you can even imagine.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {FEATURES.map((f, i) => (
+              <div key={i} className="bg-white border border-brand-border rounded-xl p-7 transition-shadow hover:shadow-md">
+                <span className="text-2xl display-block mb-3">{f.icon}</span>
+                <h3 className="font-serif-display text-lg text-brand-text mb-2">{f.title}</h3>
+                <p className="text-xs text-brand-text-muted leading-relaxed">{f.desc}</p>
+                {f.img && <img src={f.img} className="w-full h-[140px] object-cover rounded-lg mt-4" alt={f.title} />}
               </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-20 px-6 bg-muted/30">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3">
-              Everything you need
-            </h2>
-            <p className="text-muted-foreground">
-              Built for students, admins and canteen staff
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {FEATURES.map((feature, i) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-card border border-border rounded-2xl p-6"
-              >
-                <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${feature.bg}`}
-                >
-                  {feature.icon}
+      {/* ── How It Works ── */}
+      <section id="how" className="bg-white py-20">
+        <div className="max-w-[1100px] mx-auto px-8">
+          <p className="text-2xl font-bold text-brand-text font-serif-display mb-10">How It Works</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {HOW.map((h, i) => (
+              <div key={i} className="text-center">
+                <div className="w-[60px] h-[60px] rounded-full bg-brand-green-light border border-brand-green-border flex items-center justify-center text-2xl mx-auto mb-4">
+                  {h.icon}
                 </div>
-                <h3 className="font-semibold mb-2">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {feature.description}
-                </p>
-              </motion.div>
+                <h3 className="font-serif-display text-lg text-brand-text mb-2">{h.step}</h3>
+                <p className="text-xs text-brand-text-muted leading-relaxed">{h.desc}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="py-20 px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-12">How it works</h2>
-          <div className="space-y-6">
-            {[
-              { step: "01", title: "Browse Menu", desc: "Explore today's menu and add items to your cart" },
-              { step: "02", title: "Pay Online", desc: "Secure payment via Razorpay — UPI, cards, wallets" },
-              { step: "03", title: "Track Order", desc: "Get live updates as your order is prepared" },
-              { step: "04", title: "Pick Up", desc: "Collect your order when it's ready — no waiting!" },
-            ].map((item, i) => (
-              <motion.div
-                key={item.step}
-                initial={{ opacity: 0, x: -24 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="flex items-start gap-4 text-left bg-card border border-border rounded-2xl p-5"
-              >
-                <span className="text-3xl font-bold text-primary/20 shrink-0">
-                  {item.step}
-                </span>
-                <div>
-                  <h3 className="font-semibold mb-1">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground">{item.desc}</p>
-                </div>
-                <CheckCircle
-                  size={20}
-                  className="text-green-500 shrink-0 mt-0.5 ml-auto"
-                />
-              </motion.div>
-            ))}
-          </div>
+      {/* ── CTA Banner ── */}
+      <section className="px-8 pb-20">
+        <div className="max-w-[1100px] mx-auto bg-brand-green rounded-[24px] py-[60px] px-8 text-center">
+          <h2 className="font-serif-display text-3xl sm:text-4xl text-white mb-2.5">Start ordering smarter today</h2>
+          <p className="text-sm text-white/75 mb-7">Join 40,000 students reclaiming their Lunch break with QLess.</p>
+          <Link to="/register" className="bg-white text-brand-green px-8 py-3.5 rounded-full font-bold text-sm inline-block transition-all hover:bg-white/95 hover:-translate-y-0.5 hover:shadow-lg">Get Started</Link>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 px-6 bg-primary">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-primary-foreground mb-4">
-            Ready to go queue-free?
-          </h2>
-          <p className="text-primary-foreground/80 mb-8">
-            Join Qless today and experience a smarter canteen.
-          </p>
-          <Link
-            to="/register"
-            className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-primary rounded-xl font-medium hover:bg-white/90 transition-colors"
-          >
-            <ShoppingBag size={18} />
-            Get Started Free
-          </Link>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-8 px-6 border-t border-border">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-xs">
-                Q
-              </span>
-            </div>
-            <span className="font-bold">Qless</span>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            © 2025 Qless. All rights reserved.
-          </p>
+      {/* ── Footer ── */}
+      <footer className="bg-brand-text p-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p className="font-serif-display text-xl text-white">QLess</p>
+        <p className="text-xs text-white/45">© {new Date().getFullYear()} QLess. All rights reserved.</p>
+        <div className="flex gap-5">
+          <a href="#" className="text-xs text-white/55 transition-colors hover:text-white">Privacy</a>
+          <a href="#" className="text-xs text-white/55 transition-colors hover:text-white">Terms</a>
+          <a href="#" className="text-xs text-white/55 transition-colors hover:text-white">Contact</a>
         </div>
       </footer>
     </div>
-  );
-};
-
-export default Home;
+  )
+}

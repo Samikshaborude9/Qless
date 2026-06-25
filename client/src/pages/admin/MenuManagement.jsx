@@ -1,478 +1,347 @@
-// src/pages/admin/MenuManagement.jsx
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  getMenuAPI,
-  addMenuItemAPI,
-  updateMenuItemAPI,
-  deleteMenuItemAPI,
-} from "../../api/menuAPI";
-import { formatPrice } from "../../lib/utils";
-import {
-  ArrowLeft,
-  Plus,
-  Pencil,
-  Trash2,
-  UtensilsCrossed,
-  X,
-  Loader2,
-  Search,
-} from "lucide-react";
-import { toast } from "sonner";
+import { useState, useEffect } from 'react'
+import { getMenuImage } from '@/lib/menuImages'
+import { getMenuAPI, addMenuItemAPI, updateMenuItemAPI, deleteMenuItemAPI } from '@/api/menuAPI'
+import { Search, Plus, X, Edit, Trash2 } from 'lucide-react'
+import { Card, CardContent } from "@/components/ui/card"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-const CATEGORIES = [
-  "breakfast",
-  "lunch",
-  "dinner",
-  "snacks",
-  "beverages",
-  "other",
-];
+const TABS = ['All Items', 'Breakfast', 'Lunch', 'Snacks']
 
-const EMPTY_FORM = {
-  name: "",
-  description: "",
-  price: "",
-  category: "snacks",
-  stock: "",
-  prepTime: "",
-  tags: "",
-  image: "",
-  isAvailable: true,
-};
-
-const MenuManagement = () => {
-  const [menuItems, setMenuItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [editItem, setEditItem] = useState(null);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [submitting, setSubmitting] = useState(false);
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [deleting, setDeleting] = useState(null);
+export default function MenuManagement() {
+  const [items,    setItems]    = useState([])
+  const [loading,  setLoading]  = useState(true)
+  const [tab,      setTab]      = useState('All Items')
+  const [search,   setSearch]   = useState('')
+  const [showModal, setShowModal] = useState(false)
+  const [editItem, setEditItem] = useState(null)
+  const [editForm, setEditForm] = useState({})
+  const [toggling, setToggling] = useState({})
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    fetchMenu();
-  }, [search, selectedCategory]);
+    getMenuAPI()
+      .then(data => {
+        setItems(Array.isArray(data) ? data : (data.menuItems || data.items || []))
+      })
+      .catch(err => {
+        console.error(err)
+        setItems([])
+      })
+      .finally(() => setLoading(false))
+  }, [])
 
-  const fetchMenu = async () => {
+  const filtered = items.filter(m =>
+    (tab === 'All Items' || (m.cat || m.category)?.toLowerCase() === tab.toLowerCase()) &&
+    m.name.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const toggleAvail = async (item) => {
+    const isAvail = item.available !== undefined ? item.available : item.isAvailable;
+    const newVal = !isAvail;
+    setItems(prev => prev.map(i => i._id === item._id ? { ...i, available: newVal, isAvailable: newVal } : i))
+    setToggling(prev => ({ ...prev, [item._id]: true }))
     try {
-      setLoading(true);
-      const filters = {};
-      if (search) filters.search = search;
-      if (selectedCategory !== "all") filters.category = selectedCategory;
-      const data = await getMenuAPI(filters);
-      setMenuItems(data.menuItems);
-    } catch (error) {
-      toast.error("Failed to load menu");
+      await updateMenuItemAPI(item._id, { available: newVal, isAvailable: newVal })
+    } catch {
+      setItems(prev => prev.map(i => i._id === item._id ? { ...i, available: isAvail, isAvailable: isAvail } : i))
     } finally {
-      setLoading(false);
+      setToggling(prev => ({ ...prev, [item._id]: false }))
     }
-  };
+  }
 
-  const openAddModal = () => {
-    setEditItem(null);
-    setForm(EMPTY_FORM);
-    setShowModal(true);
-  };
+  const openAdd = () => {
+    setEditItem(null)
+    setEditForm({ name: '', price: '', cat: 'snacks', desc: '', available: true, stock: 0, prepTime: 10 })
+    setShowModal(true)
+  }
 
-  const openEditModal = (item) => {
-    setEditItem(item);
-    setForm({
-      name: item.name,
-      description: item.description,
-      price: item.price,
-      category: item.category,
-      stock: item.stock,
-      prepTime: item.prepTime,
-      tags: item.tags?.join(", ") || "",
-      image: item.image || "",
-      isAvailable: item.isAvailable,
-    });
-    setShowModal(true);
-  };
+  const openEdit = item => {
+    setEditItem(item)
+    setEditForm({ 
+      ...item,
+      cat: (item.cat || item.category || 'snacks').toLowerCase(),
+      available: item.available !== undefined ? item.available : item.isAvailable,
+      stock: item.stock !== undefined ? item.stock : 0,
+      prepTime: item.prepTime !== undefined ? item.prepTime : 10
+    })
+    setShowModal(true)
+  }
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
+  const closeEdit = () => {
+    setEditItem(null)
+    setShowModal(false)
+  }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
+  const saveEdit = async () => {
+    setSubmitting(true)
     try {
       const payload = {
-        ...form,
-        price: Number(form.price),
-        stock: Number(form.stock),
-        prepTime: Number(form.prepTime),
-        tags: form.tags
-          ? form.tags.split(",").map((t) => t.trim())
-          : [],
-      };
+        name: editForm.name,
+        price: Number(editForm.price),
+        cat: editForm.cat.toLowerCase(),
+        category: editForm.cat.toLowerCase(),
+        desc: editForm.desc || editForm.description,
+        description: editForm.desc || editForm.description,
+        available: editForm.available,
+        isAvailable: editForm.available,
+        stock: Number(editForm.stock),
+        prepTime: Number(editForm.prepTime),
+      }
 
       if (editItem) {
-        await updateMenuItemAPI(editItem._id, payload);
-        setMenuItems((prev) =>
-          prev.map((item) =>
-            item._id === editItem._id ? { ...item, ...payload } : item
-          )
-        );
-        toast.success("Menu item updated!");
+        const updated = await updateMenuItemAPI(editItem._id, payload)
+        // If the API doesn't return the full updated item, just optimistically merge
+        const updatedItem = updated.menuItem || updated
+        setItems(prev => prev.map(i => i._id === editItem._id ? { ...i, ...payload, ...updatedItem } : i))
       } else {
-        const data = await addMenuItemAPI(payload);
-        setMenuItems((prev) => [data.menuItem, ...prev]);
-        toast.success("Menu item added!");
+        const data = await addMenuItemAPI(payload)
+        const newItem = data.menuItem || data
+        setItems(prev => [newItem, ...prev])
       }
-      setShowModal(false);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to save item");
+      closeEdit()
+    } catch (err) {
+      alert("Save failed: " + (err.response?.data?.message || err.message))
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this menu item?")) return;
-    setDeleting(id);
-    try {
-      await deleteMenuItemAPI(id);
-      setMenuItems((prev) => prev.filter((item) => item._id !== id));
-      toast.success("Menu item deleted");
-    } catch (error) {
-      toast.error("Failed to delete item");
-    } finally {
-      setDeleting(null);
-    }
-  };
+    if (!confirm("Delete this item?")) return
+    await deleteMenuItemAPI(id)
+    setItems(prev => prev.filter(i => i._id !== id))
+  }
+
+  if (loading) return <div className="p-8 text-gray-500 flex justify-center mt-20">Loading menu...</div>
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-card border-b border-border px-6 py-4 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              to="/admin/dashboard"
-              className="p-2 hover:bg-muted rounded-lg transition-colors"
-            >
-              <ArrowLeft size={20} />
-            </Link>
-            <h1 className="font-bold text-xl">Menu Management</h1>
-          </div>
-          <button
-            onClick={openAddModal}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors"
-          >
-            <Plus size={16} />
-            Add Item
-          </button>
+    <div className="p-6 max-w-7xl mx-auto animate-fade-in relative">
+      <div className="flex flex-col md:flex-row justify-between md:items-end mb-8 space-y-4 md:space-y-0">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight font-serif">Menu Management</h1>
+          <p className="text-gray-500 mt-1 font-sans">Manage food items, pricing, and daily availability across campus.</p>
+        </div>
+        
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input 
+            value={search} 
+            onChange={e => setSearch(e.target.value)} 
+            placeholder="Search by food name..." 
+            className="pl-10 pr-4 py-2 border border-gray-200 rounded-full bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent w-full md:w-64 transition"
+          />
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-6">
-        {/* Search + Filter */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <div className="relative flex-1">
-            <Search
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-            />
-            <input
-              type="text"
-              placeholder="Search menu items..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-4 py-2.5 rounded-xl border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option value="all">All Categories</option>
-            {CATEGORIES.map((cat) => (
-              <option key={cat} value={cat} className="capitalize">
-                {cat}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Menu Grid */}
-        {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="bg-muted rounded-2xl h-56 animate-pulse" />
-            ))}
-          </div>
-        ) : menuItems.length === 0 ? (
-          <div className="text-center py-20">
-            <UtensilsCrossed
-              size={48}
-              className="mx-auto text-muted-foreground mb-4"
-            />
-            <p className="text-muted-foreground mb-4">No menu items found</p>
-            <button
-              onClick={openAddModal}
-              className="px-6 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium"
-            >
-              Add First Item
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {menuItems.map((item, i) => (
-              <motion.div
-                key={item._id}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className={`bg-card border rounded-2xl overflow-hidden ${
-                  item.isAvailable
-                    ? "border-border"
-                    : "border-red-200 opacity-60"
-                }`}
+      <div className="mb-6 overflow-x-auto pb-2 scrollbar-hide">
+        <Tabs value={tab} onValueChange={setTab} className="w-full">
+          <TabsList className="bg-transparent space-x-2">
+            {TABS.map(t => (
+              <TabsTrigger 
+                key={t} 
+                value={t}
+                className="rounded-full px-6 py-2 data-[state=active]:bg-green-700 data-[state=active]:text-white data-[state=active]:shadow-md border border-gray-200 data-[state=active]:border-transparent bg-white text-gray-600 hover:bg-gray-50 transition"
               >
-                {item.image ? (
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-32 object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-32 bg-muted flex items-center justify-center">
-                    <UtensilsCrossed
-                      size={28}
-                      className="text-muted-foreground"
-                    />
-                  </div>
-                )}
-                <div className="p-3">
-                  <p className="font-semibold text-sm truncate">{item.name}</p>
-                  <p className="text-xs text-muted-foreground capitalize mt-0.5">
-                    {item.category}
-                  </p>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="font-bold text-sm text-primary">
-                      {formatPrice(item.price)}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      Stock: {item.stock}
-                    </span>
-                  </div>
-                  <div className="flex gap-2 mt-3">
-                    <button
-                      onClick={() => openEditModal(item)}
-                      className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-muted rounded-lg text-xs font-medium hover:bg-muted/80 transition-colors"
-                    >
-                      <Pencil size={12} />
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item._id)}
-                      disabled={deleting === item._id}
-                      className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors disabled:opacity-60"
-                    >
-                      {deleting === item._id ? (
-                        <Loader2 size={12} className="animate-spin" />
-                      ) : (
-                        <Trash2 size={12} />
-                      )}
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
+                {t}
+              </TabsTrigger>
             ))}
-          </div>
-        )}
+          </TabsList>
+        </Tabs>
       </div>
 
-      {/* Add/Edit Modal */}
-      <AnimatePresence>
-        {showModal && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowModal(false)}
-              className="fixed inset-0 bg-black/50 z-50"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            >
-              <div className="bg-card border border-border rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-                {/* Modal Header */}
-                <div className="flex items-center justify-between p-6 border-b border-border">
-                  <h2 className="font-bold text-lg">
-                    {editItem ? "Edit Menu Item" : "Add Menu Item"}
-                  </h2>
-                  <button
-                    onClick={() => setShowModal(false)}
-                    className="p-2 hover:bg-muted rounded-lg"
-                  >
-                    <X size={20} />
-                  </button>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {filtered.map(item => {
+          const isAvail = item.available !== undefined ? item.available : item.isAvailable;
+          const category = item.cat || item.category || '';
+          
+          return (
+            <Card key={item._id} className={`overflow-hidden transition-all duration-300 border-none shadow-sm hover:shadow-md ${!isAvail ? 'opacity-75 grayscale-[0.2]' : ''}`}>
+              <div className="relative h-48 bg-gray-100">
+                <img 
+                  src={getMenuImage(item.name)} 
+                  alt={item.name} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop'
+                  }}
+                />
+                <div className="absolute top-3 left-3 flex flex-col space-y-2">
+                  <span className="bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
+                    {category.toUpperCase()}
+                  </span>
+                  {!isAvail && (
+                    <span className="bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm whitespace-nowrap">
+                      OUT OF STOCK
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <CardContent className="p-5">
+                <div className="flex justify-between items-start mb-4">
+                  <p className="font-bold text-gray-900 text-lg leading-tight flex-1 pr-2">{item.name}</p>
+                  <p className="font-bold text-green-700 text-lg">₹{item.price}</p>
                 </div>
 
-                {/* Modal Form */}
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="col-span-2 space-y-1.5">
-                      <label className="text-sm font-medium">Name</label>
-                      <input
-                        name="name"
-                        value={form.name}
-                        onChange={handleChange}
-                        required
-                        placeholder="Veg Burger"
-                        className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-
-                    <div className="col-span-2 space-y-1.5">
-                      <label className="text-sm font-medium">Description</label>
-                      <textarea
-                        name="description"
-                        value={form.description}
-                        onChange={handleChange}
-                        placeholder="Crispy veggie patty..."
-                        rows={2}
-                        className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium">Price (₹)</label>
-                      <input
-                        name="price"
-                        type="number"
-                        value={form.price}
-                        onChange={handleChange}
-                        required
-                        min="0"
-                        placeholder="60"
-                        className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium">Stock</label>
-                      <input
-                        name="stock"
-                        type="number"
-                        value={form.stock}
-                        onChange={handleChange}
-                        required
-                        min="0"
-                        placeholder="50"
-                        className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium">Category</label>
-                      <select
-                        name="category"
-                        value={form.category}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                      >
-                        {CATEGORIES.map((cat) => (
-                          <option key={cat} value={cat} className="capitalize">
-                            {cat}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium">
-                        Prep Time (mins)
-                      </label>
-                      <input
-                        name="prepTime"
-                        type="number"
-                        value={form.prepTime}
-                        onChange={handleChange}
-                        required
-                        min="1"
-                        placeholder="10"
-                        className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-
-                    <div className="col-span-2 space-y-1.5">
-                      <label className="text-sm font-medium">Image URL</label>
-                      <input
-                        name="image"
-                        value={form.image}
-                        onChange={handleChange}
-                        placeholder="https://..."
-                        className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-
-                    <div className="col-span-2 space-y-1.5">
-                      <label className="text-sm font-medium">
-                        Tags (comma separated)
-                      </label>
-                      <input
-                        name="tags"
-                        value={form.tags}
-                        onChange={handleChange}
-                        placeholder="veg, spicy, popular"
-                        className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-
-                    <div className="col-span-2 flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        name="isAvailable"
-                        id="isAvailable"
-                        checked={form.isAvailable}
-                        onChange={handleChange}
-                        className="w-4 h-4 accent-primary"
-                      />
-                      <label
-                        htmlFor="isAvailable"
-                        className="text-sm font-medium"
-                      >
-                        Available for ordering
-                      </label>
-                    </div>
+                <div className="flex items-center justify-between py-3 border-t border-b border-gray-100 mb-4">
+                  <div className="flex items-center space-x-2">
+                    <span className={`w-2.5 h-2.5 rounded-full ${isAvail ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                    <span className={`text-xs font-bold tracking-wide ${isAvail ? 'text-green-700' : 'text-gray-500'}`}>
+                      {isAvail ? 'AVAILABLE' : 'UNAVAILABLE'}
+                    </span>
                   </div>
+                  
+                  <label className={`relative inline-flex items-center cursor-pointer ${toggling[item._id] ? 'opacity-50' : ''}`}>
+                    <input type="checkbox" className="sr-only peer" checked={isAvail} disabled={!!toggling[item._id]} onChange={() => toggleAvail(item)} />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                  </label>
+                </div>
 
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full py-2.5 bg-primary text-primary-foreground rounded-xl font-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                <div className="flex space-x-2">
+                  <button 
+                    onClick={() => openEdit(item)}
+                    className="flex-1 flex items-center justify-center space-x-1 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-medium rounded-lg transition"
                   >
-                    {submitting && (
-                      <Loader2 size={16} className="animate-spin" />
-                    )}
-                    {editItem ? "Update Item" : "Add Item"}
+                    <Edit className="w-4 h-4" />
+                    <span>Edit</span>
                   </button>
-                </form>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
+                  <button 
+                    onClick={() => handleDelete(item._id)}
+                    className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition"
+                    title="Delete Item"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
+      </div>
 
-export default MenuManagement;
+      <button onClick={openAdd} className="fixed bottom-8 right-8 w-14 h-14 bg-green-700 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-green-800 hover:scale-105 transition-transform z-10">
+        <Plus className="w-6 h-6" />
+      </button>
+
+      {/* Edit/Add Panel Overlay */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-end">
+          <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-slide-in-right">
+            <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">{editItem ? 'Edit Item' : 'Add New Item'}</h3>
+                <p className="text-sm text-gray-500 mt-1">{editItem ? 'Update menu details & stock' : 'Add a new item to the menu'}</p>
+              </div>
+              <button onClick={closeEdit} className="p-2 bg-white rounded-full shadow-sm hover:bg-gray-100 transition">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-5">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Item Name</label>
+                <input 
+                  value={editForm.name || ''} 
+                  onChange={e => setEditForm(p => ({ ...p, name: e.target.value }))}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition"
+                />
+              </div>
+
+              <div className="flex space-x-4">
+                <div className="space-y-1.5 flex-1">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Price (₹)</label>
+                  <input 
+                    type="number" 
+                    value={editForm.price || ''} 
+                    onChange={e => setEditForm(p => ({ ...p, price: e.target.value }))}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition"
+                  />
+                </div>
+                <div className="space-y-1.5 flex-1">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Category</label>
+                  <select 
+                    value={editForm.cat || 'snacks'} 
+                    onChange={e => setEditForm(p => ({ ...p, cat: e.target.value }))}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition appearance-none capitalize"
+                  >
+                    <option value="breakfast">Breakfast</option>
+                    <option value="lunch">Lunch</option>
+                    <option value="snacks">Snacks</option>
+                    <option value="dinner">Dinner</option>
+                    <option value="beverages">Beverages</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex space-x-4">
+                <div className="space-y-1.5 flex-1">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Stock</label>
+                  <input 
+                    type="number" 
+                    value={editForm.stock ?? ''} 
+                    onChange={e => setEditForm(p => ({ ...p, stock: e.target.value }))}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition"
+                    min="0"
+                  />
+                </div>
+                <div className="space-y-1.5 flex-1">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Prep Time (mins)</label>
+                  <input 
+                    type="number" 
+                    value={editForm.prepTime ?? ''} 
+                    onChange={e => setEditForm(p => ({ ...p, prepTime: e.target.value }))}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition"
+                    min="1"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Description</label>
+                <textarea 
+                  rows={3} 
+                  value={editForm.desc || editForm.description || ''} 
+                  onChange={e => setEditForm(p => ({ ...p, desc: e.target.value }))}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition resize-none"
+                />
+              </div>
+
+              <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 flex justify-between items-center mt-6">
+                <div>
+                  <p className="font-semibold text-gray-900">Available for Orders</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Visible to students on the app</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only peer" 
+                    checked={editForm.available !== false}
+                    onChange={e => setEditForm(p => ({ ...p, available: e.target.checked }))}
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                </label>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-gray-100 flex space-x-3 bg-white">
+              <button 
+                onClick={closeEdit}
+                className="flex-1 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition"
+              >
+                Discard
+              </button>
+              <button 
+                onClick={saveEdit}
+                disabled={submitting}
+                className="flex-[2] py-3 bg-green-700 text-white font-semibold rounded-xl hover:bg-green-800 transition shadow-sm disabled:opacity-70 flex justify-center items-center"
+              >
+                {submitting ? 'Saving...' : (editItem ? 'Save Changes' : 'Add Item')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
