@@ -51,7 +51,7 @@ export default function MenuManagement() {
 
   const openAdd = () => {
     setEditItem(null)
-    setEditForm({ name: '', price: '', cat: 'snacks', desc: '', available: true, stock: 0, prepTime: 10 })
+    setEditForm({ name: '', price: '', cat: 'snacks', desc: '', available: true, stock: 0, prepTime: 10, image: '' })
     setShowModal(true)
   }
 
@@ -62,7 +62,8 @@ export default function MenuManagement() {
       cat: (item.cat || item.category || 'snacks').toLowerCase(),
       available: item.available !== undefined ? item.available : item.isAvailable,
       stock: item.stock !== undefined ? item.stock : 0,
-      prepTime: item.prepTime !== undefined ? item.prepTime : 10
+      prepTime: item.prepTime !== undefined ? item.prepTime : 10,
+      image: item.image || ''
     })
     setShowModal(true)
   }
@@ -75,24 +76,29 @@ export default function MenuManagement() {
   const saveEdit = async () => {
     setSubmitting(true)
     try {
-      const payload = {
-        name: editForm.name,
-        price: Number(editForm.price),
-        cat: editForm.cat.toLowerCase(),
-        category: editForm.cat.toLowerCase(),
-        desc: editForm.desc || editForm.description,
-        description: editForm.desc || editForm.description,
-        available: editForm.available,
-        isAvailable: editForm.available,
-        stock: Number(editForm.stock),
-        prepTime: Number(editForm.prepTime),
+      const payload = new FormData()
+      payload.append('name', editForm.name)
+      payload.append('price', Number(editForm.price))
+      payload.append('cat', editForm.cat.toLowerCase())
+      payload.append('category', editForm.cat.toLowerCase())
+      payload.append('desc', editForm.desc || editForm.description || '')
+      payload.append('description', editForm.desc || editForm.description || '')
+      payload.append('available', editForm.available)
+      payload.append('isAvailable', editForm.available)
+      payload.append('stock', Number(editForm.stock))
+      payload.append('prepTime', Number(editForm.prepTime))
+      
+      if (editForm.image instanceof File) {
+        payload.append('image', editForm.image)
+      } else if (typeof editForm.image === 'string') {
+        payload.append('image', editForm.image)
       }
 
       if (editItem) {
         const updated = await updateMenuItemAPI(editItem._id, payload)
         // If the API doesn't return the full updated item, just optimistically merge
         const updatedItem = updated.menuItem || updated
-        setItems(prev => prev.map(i => i._id === editItem._id ? { ...i, ...payload, ...updatedItem } : i))
+        setItems(prev => prev.map(i => i._id === editItem._id ? { ...i, ...updatedItem } : i))
       } else {
         const data = await addMenuItemAPI(payload)
         const newItem = data.menuItem || data
@@ -158,7 +164,7 @@ export default function MenuManagement() {
             <Card key={item._id} className={`overflow-hidden transition-all duration-300 border-none shadow-sm hover:shadow-md ${!isAvail ? 'opacity-75 grayscale-[0.2]' : ''}`}>
               <div className="relative h-48 bg-gray-100">
                 <img 
-                  src={getMenuImage(item.name)} 
+                  src={item.image || getMenuImage(item.name)} 
                   alt={item.name} 
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -245,6 +251,19 @@ export default function MenuManagement() {
                   onChange={e => setEditForm(p => ({ ...p, name: e.target.value }))}
                   className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition"
                 />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Image</label>
+                <input 
+                  type="file"
+                  accept="image/*"
+                  onChange={e => setEditForm(p => ({ ...p, image: e.target.files[0] }))}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition"
+                />
+                {typeof editForm.image === 'string' && editForm.image && (
+                  <p className="text-xs text-gray-500 mt-1">Current image: <a href={editForm.image} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline break-all">Link</a></p>
+                )}
               </div>
 
               <div className="flex space-x-4">

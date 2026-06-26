@@ -22,7 +22,8 @@ const Login = () => {
     }
     setLoading(true);
 
-    const result = await login(email, password);
+    // Ensure email is lowercased to match backend storage
+    const result = await login(email.toLowerCase(), password);
 
     if (result.success) {
       if (result.role === "student") navigate("/student/dashboard");
