@@ -114,7 +114,8 @@ const MenuPage = () => {
         {/* Menu Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
           {menuItems.map((item, i) => {
-            const unavailable = !item.available || item.stock === 0;
+            const isAvail = item.available !== undefined ? item.available : item.isAvailable;
+            const unavailable = !isAvail || item.stock === 0;
             const qty = getCartQty(item._id);
 
             return (

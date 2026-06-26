@@ -24,9 +24,9 @@ router.get("/occupancy", getLiveOccupancy);
 router.post("/", protect, placeOrder);
 router.get("/my-orders", protect, getMyOrders);
 
-// Admin
-router.get("/", protect, adminOnly, getAllOrders);
-router.patch("/:id/status", protect, adminOnly, updateOrderStatus);
+// Admin & Server staff
+router.get("/", protect, staffOnly, getAllOrders);
+router.patch("/:id/status", protect, staffOnly, updateOrderStatus);
 
 // Server staff
 router.get("/ready", protect, staffOnly, getReadyOrders);

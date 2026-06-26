@@ -80,13 +80,22 @@ export default function OrderManagement() {
     return () => clearInterval(iv)
   }, [])
 
-  // Real-time new orders
+  // Real-time new orders and updates
   useEffect(() => {
     on("order:new", (order) => {
       setOrders((prev) => [order, ...prev])
       toast.info("🛒 New order received!")
     })
-    return () => off("order:new")
+
+    on("order:pickedUp", ({ orderId }) => {
+      setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: "picked_up" } : o))
+      toast.success(`Order #${orderId.slice(-6).toUpperCase()} picked up!`)
+    })
+
+    return () => {
+      off("order:new")
+      off("order:pickedUp")
+    }
   }, [on, off])
 
   const handleStatusUpdate = async (orderId, newStatus) => {
