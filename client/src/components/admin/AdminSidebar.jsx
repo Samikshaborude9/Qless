@@ -1,28 +1,25 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { 
-  LayoutDashboard, 
-  ShoppingCart, 
-  UtensilsCrossed, 
-  Package, 
-  LineChart, 
-  BrainCircuit, 
-  Users, 
-  Settings,
-  PlusCircle,
+import {
+  LayoutDashboard,
+  ShoppingCart,
+  UtensilsCrossed,
+  Package,
+  LineChart,
+  BrainCircuit,
+  Users,
   HelpCircle,
   LogOut
 } from 'lucide-react'
 
 const NAV = [
-  { path: '/admin',             label: 'Dashboard',  icon: LayoutDashboard },
-  { path: '/admin/orders',      label: 'Orders',     icon: ShoppingCart },
-  { path: '/admin/menu',        label: 'Menu',       icon: UtensilsCrossed },
-  { path: '/admin/inventory',   label: 'Inventory',  icon: Package },
-  { path: '/admin/analytics',   label: 'Analytics',  icon: LineChart },
-  { path: '/admin/predictions', label: 'Predictions',icon: BrainCircuit },
-  { path: '/admin/students',    label: 'Users',      icon: Users },
-  { path: '/admin/settings',    label: 'Settings',   icon: Settings },
+  { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/admin/orders', label: 'Orders', icon: ShoppingCart },
+  { path: '/admin/menu', label: 'Menu', icon: UtensilsCrossed },
+  { path: '/admin/inventory', label: 'Inventory', icon: Package },
+  { path: '/admin/analytics', label: 'Analytics', icon: LineChart },
+  { path: '/admin/predictions', label: 'Predictions', icon: BrainCircuit },
+  { path: '/admin/students', label: 'Users', icon: Users },
 ]
 
 export default function AdminSidebar() {
@@ -48,16 +45,15 @@ export default function AdminSidebar() {
         {NAV.map(n => {
           const Icon = n.icon
           const isActive = location.pathname === n.path || (n.path !== '/admin' && location.pathname.startsWith(n.path))
-          
+
           return (
-            <Link 
-              key={n.path} 
+            <Link
+              key={n.path}
               to={n.path}
-              className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-                isActive 
-                  ? 'bg-green-600/10 text-green-500 font-medium' 
+              className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
+                  ? 'bg-green-600/10 text-green-500 font-medium'
                   : 'hover:bg-gray-800 hover:text-white'
-              }`}
+                }`}
             >
               <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-green-500' : 'text-gray-400 group-hover:text-green-500'}`} />
               <span>{n.label}</span>
@@ -66,28 +62,20 @@ export default function AdminSidebar() {
         })}
       </nav>
 
-      {/* New Report CTA */}
-      <div className="px-4 pb-4">
-        <button className="w-full flex items-center justify-center space-x-2 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-xl transition-colors font-medium text-sm">
-          <PlusCircle className="w-4 h-4 text-green-500" />
-          <span>Create New Report</span>
-        </button>
-      </div>
-
       {/* Bottom */}
       <div className="p-4 border-t border-gray-800 space-y-2">
         <button className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800 hover:text-white transition-colors text-sm">
           <HelpCircle className="w-4 h-4" />
           <span>Support</span>
         </button>
-        <button 
+        <button
           onClick={() => { logout(); navigate('/') }}
           className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-gray-400 hover:bg-red-500/10 hover:text-red-500 transition-colors text-sm"
         >
           <LogOut className="w-4 h-4" />
           <span>Logout</span>
         </button>
-        
+
         <div className="mt-4 pt-4 border-t border-gray-800/50 flex items-center space-x-3 px-2">
           <div className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center font-bold text-gray-300">
             {user?.name?.[0] ?? 'A'}

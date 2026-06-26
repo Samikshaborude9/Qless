@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getAllUsersAPI, createStaffAccountAPI } from '@/api/authAPI'
-import { Search, Users, UserCheck, ChevronRight, PlusCircle, X, Shield } from 'lucide-react'
+import { Search, Users, UserCheck, ChevronRight, PlusCircle, X, Shield, Eye, EyeOff } from 'lucide-react'
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "sonner"
@@ -29,6 +29,7 @@ export default function AdminStudents() {
   const [tab, setTab] = useState('students')
   
   const [showModal, setShowModal] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [staffForm, setStaffForm] = useState({ name: '', email: '', password: '' })
   const [submitting, setSubmitting] = useState(false)
 
@@ -59,6 +60,7 @@ export default function AdminStudents() {
       await createStaffAccountAPI(staffForm.name, staffForm.email, staffForm.password)
       toast.success("Staff account created successfully!")
       setShowModal(false)
+      setShowPassword(false)
       setStaffForm({ name: '', email: '', password: '' })
       loadUsers()
       setTab('staff')
@@ -169,13 +171,12 @@ export default function AdminStudents() {
                   <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-center">ORDERS</th>
                   <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">TOTAL SPENT</th>
                   <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">JOINED</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">ACTION</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500 text-sm">
+                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500 text-sm">
                       {roleFiltered.length === 0 ? `No ${tab} found.` : 'No users match your search.'}
                     </td>
                   </tr>
@@ -207,12 +208,6 @@ export default function AdminStudents() {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
                       {formatJoined(s.joined)}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button className="inline-flex items-center text-xs font-semibold text-green-700 hover:text-green-800 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition opacity-0 group-hover:opacity-100">
-                        <span>View</span>
-                        <ChevronRight className="w-3.5 h-3.5 ml-1" />
-                      </button>
                     </td>
                   </tr>
                 ))}
@@ -246,7 +241,10 @@ export default function AdminStudents() {
                     Create Staff Account
                   </div>
                   <button 
-                    onClick={() => setShowModal(false)}
+                    onClick={() => {
+                      setShowModal(false)
+                      setShowPassword(false)
+                    }}
                     className="p-2 hover:bg-gray-200 rounded-full text-gray-500 transition-colors"
                   >
                     <X className="w-4 h-4" />
@@ -278,21 +276,33 @@ export default function AdminStudents() {
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Password</label>
-                    <input 
-                      type="password"
-                      required
-                      minLength={6}
-                      value={staffForm.password}
-                      onChange={e => setStaffForm(p => ({ ...p, password: e.target.value }))}
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all text-sm"
-                      placeholder="Min. 6 characters"
-                    />
+                    <div className="relative">
+                      <input 
+                        type={showPassword ? "text" : "password"}
+                        required
+                        minLength={6}
+                        value={staffForm.password}
+                        onChange={e => setStaffForm(p => ({ ...p, password: e.target.value }))}
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all text-sm pr-10"
+                        placeholder="Min. 6 characters"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                   
                   <div className="pt-4 flex items-center justify-end gap-3">
                     <button 
                       type="button"
-                      onClick={() => setShowModal(false)}
+                      onClick={() => {
+                        setShowModal(false)
+                        setShowPassword(false)
+                      }}
                       className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
                     >
                       Cancel
