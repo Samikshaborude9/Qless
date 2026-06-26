@@ -32,6 +32,7 @@ import AdminSidebar from "./components/admin/AdminSidebar";
 
 // Server Pages
 import ServerDashboard from "./pages/server/ServerDashboard";
+import ServerNav from "./components/server/ServerNav";
 
 // Not Found
 import NotFound from "./pages/NotFound";
@@ -138,11 +139,14 @@ const AppRoutes = () => {
       </Route>
 
       {/* Server Routes */}
-      <Route path="/server/dashboard" element={
+      <Route path="/server" element={
         <ProtectedRoute allowedRoles={["server"]}>
-          <ServerDashboard />
+          <ServerNav />
+          <Outlet />
         </ProtectedRoute>
-      } />
+      }>
+        <Route path="dashboard" element={<ServerDashboard />} />
+      </Route>
 
       {/* 404 */}
       <Route path="*" element={<NotFound />} />
