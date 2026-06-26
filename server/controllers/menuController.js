@@ -55,8 +55,13 @@ export const getMenuItem = async (req, res, next) => {
 // @access  Private/Admin
 export const addMenuItem = async (req, res, next) => {
   try {
-    const { name, description, price, category, image, stock, prepTime, tags } =
+    const { name, description, price, category, stock, prepTime, tags } =
       req.body;
+
+    let image = req.body.image || "";
+    if (req.file) {
+      image = req.file.path;
+    }
 
     const menuItem = await MenuItem.create({
       name,
@@ -90,9 +95,14 @@ export const addMenuItem = async (req, res, next) => {
 // @access  Private/Admin
 export const updateMenuItem = async (req, res, next) => {
   try {
+    const updates = { ...req.body };
+    if (req.file) {
+      updates.image = req.file.path;
+    }
+
     const menuItem = await MenuItem.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updates,
       { new: true, runValidators: true }
     );
 

@@ -1,4 +1,3 @@
-// routes/menuRoutes.js
 import express from "express";
 import {
   getMenu,
@@ -9,6 +8,7 @@ import {
   updateStock,
 } from "../controllers/menuController.js";
 import { protect, adminOnly } from "../middlewares/authMiddleware.js";
+import upload from "../config/cloudinary.js";
 
 const router = express.Router();
 
@@ -17,8 +17,8 @@ router.get("/", getMenu);
 router.get("/:id", getMenuItem);
 
 // Admin only routes
-router.post("/", protect, adminOnly, addMenuItem);
-router.put("/:id", protect, adminOnly, updateMenuItem);
+router.post("/", protect, adminOnly, upload.single("image"), addMenuItem);
+router.put("/:id", protect, adminOnly, upload.single("image"), updateMenuItem);
 router.delete("/:id", protect, adminOnly, deleteMenuItem);
 router.patch("/:id/stock", protect, adminOnly, updateStock);
 

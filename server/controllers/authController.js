@@ -14,7 +14,8 @@ const generateToken = (id) => {
 // @access  Public
 export const register = async (req, res, next) => {
   try {
-    const { name, email, password, role } = req.body;
+    let { name, email, password, role } = req.body;
+    if (email) email = email.toLowerCase();
 
     // Only student and admin can self-register
     if (role === "server") {
@@ -55,7 +56,8 @@ export const register = async (req, res, next) => {
 // @access  Public
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+    if (email) email = email.toLowerCase();
 
     if (!email || !password) {
       return res.status(400).json({
@@ -147,7 +149,8 @@ export const updateProfile = async (req, res, next) => {
 // @access  Private/Admin
 export const createStaffAccount = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    let { name, email, password } = req.body;
+    if (email) email = email.toLowerCase();
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
