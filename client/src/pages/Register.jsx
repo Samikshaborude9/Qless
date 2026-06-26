@@ -4,6 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Icon from "../components/common/Icon";
 import { toast } from "sonner";
+import { ChevronLeft } from "lucide-react";
+import canteenImg from "../assets/canteenManagement.png";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -17,6 +19,7 @@ const Register = () => {
     role: "student",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -64,7 +67,7 @@ const Register = () => {
       <div className="flex-1 max-w-[520px] bg-white px-12 py-8 flex flex-col relative justify-between">
         <div>
           <button onClick={() => navigate('/')} className="inline-flex items-center gap-1.5 bg-transparent border-0 text-brand-text-muted text-xs font-semibold cursor-pointer mb-8 transition-colors hover:text-brand-text">
-            <Icon name="arrow" size={16} color="var(--text-muted)" />
+            <ChevronLeft size={16} color="var(--text-muted)" />
             Back
           </button>
 
@@ -101,29 +104,7 @@ const Register = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold text-brand-text-faint tracking-wider">REGISTER AS</label>
-                <div className="flex rounded-lg overflow-hidden border border-brand-border">
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, role: "student" })}
-                    className={`flex-1 py-2.5 text-xs font-bold border-0 cursor-pointer transition-colors ${
-                      formData.role === "student" ? "bg-brand-green text-white" : "bg-[#fdf3ec] text-brand-text-muted hover:bg-[#f5ebe0]"
-                    }`}
-                  >
-                    Student
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, role: "admin" })}
-                    className={`flex-1 py-2.5 text-xs font-bold border-0 cursor-pointer transition-colors ${
-                      formData.role === "admin" ? "bg-brand-green text-white" : "bg-[#fdf3ec] text-brand-text-muted hover:bg-[#f5ebe0]"
-                    }`}
-                  >
-                    Canteen Admin
-                  </button>
-                </div>
-              </div>
+
 
               <div className="grid grid-cols-2 gap-3.5">
                 <div className="flex flex-col gap-1.5">
@@ -149,14 +130,23 @@ const Register = () => {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[10px] font-bold text-brand-text-faint tracking-wider">CONFIRM PASSWORD</label>
-                  <input 
-                    type="password"
-                    name="confirmPassword"
-                    placeholder="••••••••"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="w-full bg-[#f5f7f5] border border-brand-border rounded-lg p-2.5 px-3.5 text-xs text-brand-text focus:outline-none focus:border-brand-green focus:bg-white transition-colors"
-                  />
+                  <div className="relative">
+                    <input 
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      name="confirmPassword"
+                      placeholder="••••••••"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="w-full bg-[#f5f7f5] border border-brand-border rounded-lg p-2.5 px-3.5 pr-10 text-xs text-brand-text focus:outline-none focus:border-brand-green focus:bg-white transition-colors"
+                    />
+                    <button 
+                      type="button" 
+                      className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-0 cursor-pointer flex"
+                      onClick={() => setShowConfirmPassword(p => !p)}
+                    >
+                      <Icon name={showConfirmPassword ? 'eyeoff' : 'eye'} size={16} color="var(--text-faint)" />
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -184,8 +174,8 @@ const Register = () => {
 
       {/* Right panel */}
       <div className="flex-1 bg-gradient-to-br from-[#f0f7eb] via-[#e8f5e0] to-[#f5f0e8] flex items-center justify-center p-10 overflow-hidden relative">
-        <div className="bg-white rounded-[20px] shadow-lg overflow-hidden w-60 h-80 animate-float">
-          <img src="https://images.unsplash.com/photo-1597362925123-77861d3fbac7?w=300&q=80" alt="healthy food" className="w-full h-full object-cover" />
+        <div className="bg-white rounded-[20px] shadow-lg overflow-hidden w-64 h-80 flex items-center justify-center p-2 animate-float">
+          <img src={canteenImg} alt="canteen management" className="w-full h-full object-contain" />
         </div>
         <p className="absolute bottom-6 left-0 right-0 text-center text-[10px] text-brand-text-faint leading-relaxed">
           Skip canteen rush with real-time updates.<br />

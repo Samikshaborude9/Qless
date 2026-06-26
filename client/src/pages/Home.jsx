@@ -1,11 +1,15 @@
 import { Link } from 'react-router-dom'
 import LandingNav from '../components/landing/LandingNav'
+import demandPredictionImg from '../assets/demandPrediction.png'
+import spendImg from '../assets/menu/spend.png'
+import trackingImg from '../assets/menu/tracking.png'
+import nutritionImg from '../assets/menu/neutritionTrack.png'
 
 const FEATURES = [
-  { icon: '📍', title: 'Real-time Tracking', desc: 'Know exactly where your order is. Track your meal by the minute, from kitchen to your hands.', img: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&q=80' },
-  { icon: '🔮', title: 'Demand Prediction', desc: 'Our smart system predicts peak hours to help you plan your order helping you avoid the campus rush.', img: null },
-  { icon: '💳', title: 'Spending Insights', desc: 'Know exactly how your food habits, with monthly and weekly spending summaries and personalised tips.', img: null },
-  { icon: '🥗', title: 'Nutrition Tracking', desc: 'Confident nutrition tracking to you can make decisions about your meals that meet your fitness goals.', img: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80' },
+  { icon: '📍', title: 'Real-time Tracking', desc: 'Know exactly where your order is. Track your meal by the minute, from kitchen to your hands.', img: trackingImg, imgFit: 'contain' },
+  { icon: '🔮', title: 'Demand Prediction', desc: 'Our smart system predicts peak hours to help you plan your order helping you avoid the campus rush.', img: demandPredictionImg, imgFit: 'contain' },
+  { icon: '💳', title: 'Spending Insights', desc: 'Know exactly how your food habits, with monthly and weekly spending summaries and personalised tips.', img: spendImg, imgFit: 'contain' },
+  { icon: '🥗', title: 'Nutrition Tracking', desc: 'Confident nutrition tracking to you can make decisions about your meals that meet your fitness goals.', img: nutritionImg, imgFit: 'contain' },
 ]
 
 const HOW = [
@@ -56,7 +60,7 @@ export default function Home() {
                 <span className="text-2xl display-block mb-3">{f.icon}</span>
                 <h3 className="font-serif-display text-lg text-brand-text mb-2">{f.title}</h3>
                 <p className="text-xs text-brand-text-muted leading-relaxed">{f.desc}</p>
-                {f.img && <img src={f.img} className="w-full h-[140px] object-cover rounded-lg mt-4" alt={f.title} />}
+                {f.img && <img src={f.img} className={`w-full h-[140px] rounded-lg mt-4 ${f.imgFit === 'contain' ? 'object-contain object-center' : 'object-cover'}`} alt={f.title} />}
               </div>
             ))}
           </div>

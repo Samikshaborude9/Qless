@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Icon from "../components/common/Icon";
 import { toast } from "sonner";
+import { ChevronLeft } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ const Login = () => {
       <div className="flex-1 max-w-[520px] bg-white px-12 py-8 flex flex-col relative justify-between">
         <div>
           <button onClick={() => navigate('/')} className="inline-flex items-center gap-1.5 bg-transparent border-0 text-brand-text-muted text-xs font-semibold cursor-pointer mb-8 transition-colors hover:text-brand-text">
-            <Icon name="arrow" size={16} color="var(--text-muted)" />
+            <ChevronLeft size={16} color="var(--text-muted)" />
             Back
           </button>
 
@@ -94,19 +95,7 @@ const Login = () => {
                 {loading ? "Signing In..." : 'Sign In'}
               </button>
 
-              <div className="flex items-center gap-3 text-brand-text-faint text-[10px] font-bold tracking-wider my-2">
-                <div className="flex-1 h-px bg-brand-border"></div>
-                <span>OR CONTINUE WITH</span>
-                <div className="flex-1 h-px bg-brand-border"></div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-2.5">
-                <button type="button" className="flex items-center justify-center gap-2 p-2.5 rounded-lg bg-white border border-brand-border text-xs font-semibold text-brand-text cursor-pointer transition-colors hover:border-brand-green hover:text-brand-green">
-                  <img src="https://www.google.com/favicon.ico" width={16} height={16} alt="Google" />
-                  Google
-                </button>
-                <button type="button" className="flex items-center justify-center gap-2 p-2.5 rounded-lg bg-white border border-brand-border text-xs font-semibold text-brand-text cursor-pointer transition-colors hover:border-brand-green hover:text-brand-green">🏫 SSO</button>
-              </div>
             </form>
 
             <p className="text-center text-xs text-brand-text-muted mt-5">
