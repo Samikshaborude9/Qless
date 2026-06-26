@@ -116,16 +116,16 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           {
-            l: "Total Revenue",
-            v: formatPrice(overview?.totalRevenue ?? 0),
+            l: "Today's Revenue",
+            v: formatPrice(overview?.todayRevenue ?? 0),
             icon: IndianRupee,
             color: "text-emerald-600",
             bg: "bg-emerald-50",
             border: "border-emerald-100",
           },
           {
-            l: "Total Orders",
-            v: overview?.totalOrders?.toLocaleString() ?? "0",
+            l: "Today's Orders",
+            v: overview?.todayOrders?.toLocaleString() ?? "0",
             icon: BarChart3,
             color: "text-blue-600",
             bg: "bg-blue-50",
