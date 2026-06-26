@@ -16,15 +16,6 @@ import {
 } from "recharts";
 import { toast } from "sonner";
 
-const WEEK_DATA = [
-  { day: "MON", orders: 3 },
-  { day: "TUE", orders: 5 },
-  { day: "WED", orders: 9 },
-  { day: "THU", orders: 7 },
-  { day: "FRI", orders: 8 },
-  { day: "SAT", orders: 4 },
-  { day: "SUN", orders: 3 },
-];
 
 const SPENDING_BREAKDOWN = [
   { label: "Breakfast Items", pct: 42, color: "var(--green)" },
@@ -104,6 +95,25 @@ const StudentInsights = () => {
     0
   );
   const avgOrder = totalOrders > 0 ? Math.round(totalSpending / totalOrders) : 0;
+
+  // Compute Weekly Activity
+  const weekDataMap = { MON: 0, TUE: 0, WED: 0, THU: 0, FRI: 0, SAT: 0, SUN: 0 };
+  orders.forEach((o) => {
+    if (o.createdAt) {
+      const date = new Date(o.createdAt);
+      const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+      weekDataMap[days[date.getDay()]] += 1;
+    }
+  });
+  const dynamicWeekData = [
+    { day: "MON", orders: weekDataMap["MON"] },
+    { day: "TUE", orders: weekDataMap["TUE"] },
+    { day: "WED", orders: weekDataMap["WED"] },
+    { day: "THU", orders: weekDataMap["THU"] },
+    { day: "FRI", orders: weekDataMap["FRI"] },
+    { day: "SAT", orders: weekDataMap["SAT"] },
+    { day: "SUN", orders: weekDataMap["SUN"] },
+  ];
 
   // Top favourites from order history
   const itemCounts = {};
@@ -227,13 +237,14 @@ const StudentInsights = () => {
                   ● ORDERS
                 </Badge>
               </div>
-              <ResponsiveContainer width="100%" height={130}>
-                <BarChart data={WEEK_DATA} barCategoryGap="25%">
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={dynamicWeekData} barCategoryGap="25%" margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                   <XAxis
                     dataKey="day"
                     axisLine={false}
                     tickLine={false}
                     tick={{ fontSize: 11, fill: "var(--text-faint)" }}
+                    dy={10}
                   />
                   <YAxis hide />
                   <Tooltip
@@ -245,7 +256,7 @@ const StudentInsights = () => {
                     }}
                   />
                   <Bar dataKey="orders" radius={[4, 4, 0, 0]}>
-                    {WEEK_DATA.map((_, idx) => (
+                    {dynamicWeekData.map((_, idx) => (
                       <Cell
                         key={idx}
                         fill={`url(#greenGrad)`}
@@ -262,9 +273,9 @@ const StudentInsights = () => {
               </ResponsiveContainer>
               <Badge
                 variant="outline"
-                className="mt-2 text-[10px] text-brand-text-faint border-brand-border rounded-full"
+                className="mt-2 text-[10px] text-brand-text-faint border-brand-border rounded-full bg-brand-bg/50"
               >
-                Demo data — real analytics coming soon
+                Based on your order history
               </Badge>
             </CardContent>
           </Card>

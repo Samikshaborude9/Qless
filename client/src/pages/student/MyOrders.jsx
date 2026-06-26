@@ -104,7 +104,7 @@ function OrderModal({ order, onClose }) {
               className="flex items-center gap-3 py-2 border-b border-brand-border last:border-b-0"
             >
               <img
-                src={item.image || FALLBACK_IMG}
+                src={item.menuItem?.image || item.image || FALLBACK_IMG}
                 alt={item.name}
                 className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
                 onError={(e) => {
@@ -371,7 +371,7 @@ const MyOrders = () => {
                     className="bg-white border border-brand-border rounded-2xl flex items-center gap-4 p-4.5 hover:shadow-lg transition-shadow"
                   >
                     <img
-                      src={order.items?.[0]?.image || FALLBACK_IMG}
+                      src={order.items?.[0]?.menuItem?.image || order.items?.[0]?.image || FALLBACK_IMG}
                       alt={order.items?.[0]?.name || "Order"}
                       className="w-[90px] h-[78px] rounded-xl object-cover flex-shrink-0"
                       onError={(e) => {
