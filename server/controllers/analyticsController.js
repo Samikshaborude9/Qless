@@ -20,15 +20,16 @@ export const getOverview = async (req, res, next) => {
       totalStudents,
       totalMenuItems,
     ] = await Promise.all([
-      Order.countDocuments({ paymentStatus: "paid" }),
-      Order.countDocuments({ createdAt: { $gte: today }, paymentStatus: "paid" }),
-      Order.countDocuments({ status: { $in: ["confirmed", "preparing", "ready"] } }),
+      Order.countDocuments(),
+      Order.countDocuments({ createdAt: { $gte: today } }),
+      Order.countDocuments({ status: { $in: ["pending", "confirmed", "preparing", "ready"] } }),
       Order.aggregate([
-        { $match: { paymentStatus: "paid" } },
+        // no match required for all-time
+
         { $group: { _id: null, total: { $sum: "$totalAmount" } } },
       ]),
       Order.aggregate([
-        { $match: { paymentStatus: "paid", createdAt: { $gte: today } } },
+        { $match: { createdAt: { $gte: today } } },
         { $group: { _id: null, total: { $sum: "$totalAmount" } } },
       ]),
       User.countDocuments({ role: "student" }),
@@ -58,7 +59,7 @@ export const getOverview = async (req, res, next) => {
 export const getPopularDishes = async (req, res, next) => {
   try {
     const popularDishes = await Order.aggregate([
-      { $match: { paymentStatus: "paid" } },
+      // all orders
       { $unwind: "$items" },
       {
         $group: {
@@ -90,7 +91,7 @@ export const getPopularDishes = async (req, res, next) => {
 export const getPeakHours = async (req, res, next) => {
   try {
     const peakHours = await Order.aggregate([
-      { $match: { paymentStatus: "paid" } },
+      // all orders
       {
         $group: {
           _id: { $hour: "$createdAt" },
@@ -128,7 +129,6 @@ export const getRevenue = async (req, res, next) => {
     const revenue = await Order.aggregate([
       {
         $match: {
-          paymentStatus: "paid",
           createdAt: { $gte: last7Days },
         },
       },
@@ -159,7 +159,7 @@ export const getRevenue = async (req, res, next) => {
 export const getFeedbackSummary = async (req, res, next) => {
   try {
     const feedbackSummary = await Order.aggregate([
-      { $match: { paymentStatus: "paid" } },
+      // all orders
       { $unwind: "$items" },
       {
         $lookup: {

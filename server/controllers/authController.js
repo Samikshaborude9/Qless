@@ -188,7 +188,7 @@ export const createStaffAccount = async (req, res, next) => {
 export const getAllUsers = async (req, res, next) => {
   try {
     const students = await User.aggregate([
-      { $match: { role: "student" } },
+      { $match: { role: { $in: ["student", "server"] } } },
       {
         $lookup: {
           from: "orders",
@@ -202,6 +202,7 @@ export const getAllUsers = async (req, res, next) => {
           id: "$_id",
           name: 1,
           email: 1,
+          role: 1,
           orders: { $size: "$ordersList" },
           spent: {
             $reduce: {

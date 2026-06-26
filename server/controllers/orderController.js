@@ -167,9 +167,15 @@ export const updateOrderStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
 
+    let updateData = { status };
+    if (status === "picked_up") {
+      updateData.pickedUpAt = new Date();
+      updateData.pickedUpBy = req.user._id;
+    }
+
     const order = await Order.findByIdAndUpdate(
       req.params.id,
-      { status },
+      updateData,
       { new: true }
     ).populate("student", "name email");
 
@@ -191,6 +197,15 @@ export const updateOrderStatus = async (req, res, next) => {
       // If ready, notify server room
       if (status === "ready") {
         io.to("serverRoom").emit("order:nowReady", order);
+      }
+      
+      if (status === "picked_up") {
+        io.to("adminRoom").emit("order:pickedUp", { orderId: order._id });
+        io.to("serverRoom").emit("order:pickedUp", { orderId: order._id });
+
+        // Update occupancy for all students
+        const occupancy = await calculateOccupancy();
+        io.emit("occupancy:update", occupancy);
       }
     }
 
@@ -253,6 +268,9 @@ export const markPickedUp = async (req, res, next) => {
         orderId: order._id,
         status: "picked_up",
       });
+
+      io.to("adminRoom").emit("order:pickedUp", { orderId: order._id });
+      io.to("serverRoom").emit("order:pickedUp", { orderId: order._id });
 
       // Update occupancy for all students
       const occupancy = await calculateOccupancy();
