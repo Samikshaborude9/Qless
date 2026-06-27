@@ -370,7 +370,7 @@ export default function InventoryPage() {
             <table className="w-full text-left border-collapse min-w-[700px]">
               <thead>
                 <tr className="bg-white border-b border-gray-100">
-                  <th className="px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Ingredient</th>
+                  <th className="px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Name</th>
                   <th className="px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Category</th>
                   <th className="px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Stock</th>
                   <th className="px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Threshold</th>
@@ -629,7 +629,7 @@ export default function InventoryPage() {
                 <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium text-gray-700">
-                      Ingredient Name
+                      Name
                     </label>
                     <input
                       name="name"

@@ -68,7 +68,7 @@ export default function AdminPredictions() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <Card className="border-none shadow-sm shadow-gray-100 hover:shadow-md transition">
           <CardContent className="p-5">
             <div className="flex items-center space-x-2 mb-2">
@@ -83,7 +83,7 @@ export default function AdminPredictions() {
           <CardContent className="p-5">
             <div className="flex items-center space-x-2 mb-2">
               <Activity className="w-4 h-4 text-blue-500" />
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Current Orders</p>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Orders</p>
             </div>
             <p className="text-3xl font-bold text-blue-600">
               {current?.predictions?.reduce((s, p) => s + p.predicted_orders, 0) ?? '--'}
@@ -91,7 +91,7 @@ export default function AdminPredictions() {
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-sm shadow-gray-100 hover:shadow-md transition">
+        {/* <Card className="border-none shadow-sm shadow-gray-100 hover:shadow-md transition">
           <CardContent className="p-5">
             <div className="flex items-center space-x-2 mb-2">
               <Clock className="w-4 h-4 text-gray-400" />
@@ -99,7 +99,7 @@ export default function AdminPredictions() {
             </div>
             <p className="text-3xl font-bold text-gray-900">{next?.slot ?? '--'}</p>
           </CardContent>
-        </Card>
+        </Card> */}
 
         <Card className="border-none shadow-sm shadow-gray-100 hover:shadow-md transition">
           <CardContent className="p-5">
